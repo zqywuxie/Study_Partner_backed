@@ -3,7 +3,6 @@ package com.example.usercenterback.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.usercenterback.common.CommonResult;
 import com.example.usercenterback.common.ErrorCode;
-import com.example.usercenterback.domain.Article;
 import com.example.usercenterback.domain.User;
 import com.example.usercenterback.domain.request.LoginInfo;
 import com.example.usercenterback.domain.request.RegisterInfo;
@@ -33,8 +32,7 @@ import static com.example.usercenterback.constant.UserConstant.User_Login_Status
 public class UserController {
     @Autowired
     UserService userService;
-    @Autowired
-    ArticleService articleService;
+
 
     /**
      * 登录接口
@@ -222,16 +220,5 @@ public class UserController {
         return ResultUtils.success(save);
     }
 
-    //===========文章数据获取
-    @GetMapping("/article")
-    public CommonResult<List<Article>> article(String userAccount)
-    {
-        QueryWrapper<Article> articleQueryWrapper = new QueryWrapper<>();
 
-        if (StringUtils.isNotBlank(userAccount)) {
-            articleQueryWrapper.like("userAccount", userAccount);
-        }
-        List<Article> list = articleService.list(articleQueryWrapper);
-        return ResultUtils.success(list);
-    }
 }
