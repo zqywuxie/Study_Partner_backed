@@ -1,5 +1,7 @@
 package com.example.usercenterback.domain.request;
 
+import io.swagger.annotations.ApiModelProperty;
+import io.swagger.annotations.ApiOperation;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,9 +13,13 @@ import java.io.Serializable;
  * @Author:zqy
  */
 @Data
+@ApiOperation("登录信息")
 public class RegisterInfo implements Serializable {
     private static final long serialVersionUID = -2227307106629029499L;
+    @ApiModelProperty("用户账号")
     private String userAccount;
+    @ApiModelProperty("用户密码")
     private String userPassword;
+    @ApiModelProperty("核实密码")
     private String checkPassword;
 }

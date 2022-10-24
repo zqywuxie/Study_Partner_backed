@@ -7,9 +7,9 @@ import com.example.usercenterback.domain.User;
 import com.example.usercenterback.domain.request.LoginInfo;
 import com.example.usercenterback.domain.request.RegisterInfo;
 import com.example.usercenterback.exception.ResultException;
-import com.example.usercenterback.service.ArticleService;
 import com.example.usercenterback.service.UserService;
 import com.example.usercenterback.utils.ResultUtils;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +27,8 @@ import static com.example.usercenterback.constant.UserConstant.User_Login_Status
  * @version 1.0
  * @Author:zqy
  */
+@Api(value = "UserController",tags = "用户接口")
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -41,6 +43,11 @@ public class UserController {
      * @param request
      * @return
      */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "LoginInfo", name = "loginInfo", value = "", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
+    })
+    @ApiOperation(value = "登录接口", notes = "登录接口", httpMethod = "POST")
     @PostMapping("/login")
     public CommonResult<User> Login(@RequestBody LoginInfo loginInfo, HttpServletRequest request) {
         if (loginInfo == null) {
@@ -62,6 +69,10 @@ public class UserController {
      * @return
      */
 
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "RegisterInfo", name = "registerInfo", value = "", required = true)
+    })
+    @ApiOperation(value = "注册接口", notes = "注册接口", httpMethod = "POST")
     @PostMapping("/register")
     public CommonResult<Long> Register(@RequestBody RegisterInfo registerInfo) {
         if (registerInfo == null) {
@@ -86,6 +97,11 @@ public class UserController {
      * @param request
      * @return
      */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "User", name = "user", value = "", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
+    })
+    @ApiOperation(value = "删除接口", notes = "删除接口", httpMethod = "POST")
     @PostMapping("/delete")
     public CommonResult<Boolean> Delete(@RequestBody User user,HttpServletRequest request) {
         if (!isAdmin(request)) {
@@ -108,6 +124,11 @@ public class UserController {
      * @param request
      * @return
      */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "string", name = "username", value = "", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
+    })
+    @ApiOperation(value = "根据用户名查询 管理接口", notes = "根据用户名查询 管理接口", httpMethod = "GET")
     @GetMapping("/search")
     public CommonResult<List<User>> users(String username, HttpServletRequest request) {
         if (!isAdmin(request)) {
@@ -129,6 +150,10 @@ public class UserController {
      * @param request
      * @return
      */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
+    })
+    @ApiOperation(value = "校验用户权限", notes = "校验用户权限")
     public boolean isAdmin(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(User_Login_Status);
         User user = (User) attribute;
@@ -143,6 +168,10 @@ public class UserController {
      * @param request
      * @return
      */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
+    })
+    @ApiOperation(value = "根据session获得当前用户数据", notes = "根据session获得当前用户数据", httpMethod = "GET")
     @GetMapping("/current")
     public CommonResult<User> currentUser(HttpServletRequest request) {
         Object attribute = request.getSession().getAttribute(User_Login_Status);
@@ -161,6 +190,10 @@ public class UserController {
      * @param request
      * @return
      */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
+    })
+    @ApiOperation(value = "退出登录 删除用户登录态", notes = "退出登录 删除用户登录态", httpMethod = "POST")
     @PostMapping("/outLogin")
     public CommonResult<Integer> outLogin(HttpServletRequest request) {
         if (request == null) {
@@ -175,6 +208,11 @@ public class UserController {
      * @param user
      * @return
      */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "User", name = "user", value = "", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
+    })
+    @ApiOperation(value = "更新数据", notes = "更新数据", httpMethod = "POST")
     @PostMapping("/change")
     public CommonResult<Boolean> update(@RequestBody User user,HttpServletRequest request)
     {
@@ -197,6 +235,11 @@ public class UserController {
      * @param request
      * @return
      */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "body", dataType = "User", name = "user", value = "", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
+    })
+    @ApiOperation(value = "添加数据", notes = "添加数据", httpMethod = "POST")
     @PostMapping("/insert")
     public CommonResult<Boolean>insert(@RequestBody User user,HttpServletRequest request)
     {
