@@ -4,8 +4,8 @@ spring:
   datasource:
     username: root
     password: 123
-    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/project?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 server:
   servlet:

@@ -162,6 +162,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setUserStatus(user.getUserStatus());
         user.setPhone(user.getPhone());
         user.setCreateTime(user.getCreateTime());
+        user.setCity(user.getCity());
+        user.setProvince(user.getProvince());
+        user.setProfile(user.getProfile());
         // 将数据通过session进行传入
         return ResultUtils.success(user);
     }

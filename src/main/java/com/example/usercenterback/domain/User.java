@@ -17,6 +17,7 @@ import java.util.Date;
 @Data
 public class User implements Serializable {
 
+    @ApiModelProperty("")
     private static final long serialVersionUID = 1760524879185272823L;
     /**
      * 用户id
@@ -103,5 +104,25 @@ public class User implements Serializable {
      */
     @ApiModelProperty("用户权限 0 普通用户 1 管理员")
     private  Integer userRole;
+
+    /**
+     *用户城市
+     */
+    @ApiModelProperty("用户城市")
+    private String city;
+
+    /**
+     *用户个人简历
+     */
+
+    @ApiModelProperty("用户个人简历")
+    private String profile;
+
+    /**
+     *用户省
+     */
+
+    @ApiModelProperty("用户省")
+    private String province;
     
 }
