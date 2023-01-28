@@ -4,12 +4,13 @@ spring:
   datasource:
     username: root
     password: 123
-    url: jdbc:mysql://localhost:3306/project?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/UserCenter?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
-
-server:
   servlet:
     context-path: /api
-mybatis-plus:
+#  mvc:
+#    pathmatch:
+#      matching-strategy: ant_path_matcher
   configuration:
     map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
