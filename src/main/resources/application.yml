@@ -6,11 +6,22 @@ spring:
     password: 123
     url: jdbc:mysql://localhost:3306/UserCenter?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
+  session:
+    timeout: 86400
+    store-type: redis
+  redis:
+    password: 123
+  #  mvc:
+  #    pathmatch:
+  #      matching-strategy: ant_path_matcher
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+mybatis-plus:
+  configuration:
+    #    mybatis-plus 关闭驼峰转换下划线功能
+    map-underscore-to-camel-case: false
+# 增加统一前缀/api
+server:
   servlet:
     context-path: /api
-#  mvc:
-#    pathmatch:
-#      matching-strategy: ant_path_matcher
-  configuration:
-    map-underscore-to-camel-case: false
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

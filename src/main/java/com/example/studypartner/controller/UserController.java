@@ -12,6 +12,7 @@ import com.example.studypartner.utils.ResultUtils;
 import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,10 +28,11 @@ import static com.example.studypartner.constant.UserConstant.User_Login_Status;
  * @version 1.0
  * @Author:zqy
  */
-@Api(value = "UserController",tags = "用户接口")
+@Api(value = "UserController", tags = "用户接口")
 
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = {"http://localhost:5173/"})
 public class UserController {
     @Autowired
     UserService userService;
@@ -103,12 +105,12 @@ public class UserController {
     })
     @ApiOperation(value = "删除接口", notes = "删除接口", httpMethod = "POST")
     @PostMapping("/delete")
-    public CommonResult<Boolean> Delete(@RequestBody User user,HttpServletRequest request) {
+    public CommonResult<Boolean> Delete(@RequestBody User user, HttpServletRequest request) {
         if (!isAdmin(request)) {
             throw new ResultException(ErrorCode.NOT_ADMIN);
         }
 
-        if (user==null) {
+        if (user == null) {
             throw new ResultException(ErrorCode.NULL_ERROR);
 
         }
@@ -165,6 +167,7 @@ public class UserController {
 
     /**
      * 根据session获得当前用户数据
+     *
      * @param request
      * @return
      */
@@ -187,6 +190,7 @@ public class UserController {
 
     /**
      * 退出登录 删除用户登录态
+     *
      * @param request
      * @return
      */
@@ -205,6 +209,7 @@ public class UserController {
 
     /**
      * 更新数据
+     *
      * @param user
      * @return
      */
@@ -214,14 +219,11 @@ public class UserController {
     })
     @ApiOperation(value = "更新数据", notes = "更新数据", httpMethod = "POST")
     @PostMapping("/change")
-    public CommonResult<Boolean> update(@RequestBody User user,HttpServletRequest request)
-    {
-        if (!isAdmin(request))
-        {
+    public CommonResult<Boolean> update(@RequestBody User user, HttpServletRequest request) {
+        if (!isAdmin(request)) {
             throw new ResultException(ErrorCode.NOT_ADMIN);
         }
-        if (user==null)
-        {
+        if (user == null) {
             throw new ResultException(ErrorCode.NULL_ERROR);
         }
 
@@ -230,7 +232,8 @@ public class UserController {
     }
 
     /**
-     *  添加数据
+     * 添加数据
+     *
      * @param user
      * @param request
      * @return
@@ -241,27 +244,31 @@ public class UserController {
     })
     @ApiOperation(value = "添加数据", notes = "添加数据", httpMethod = "POST")
     @PostMapping("/insert")
-    public CommonResult<Boolean>insert(@RequestBody User user,HttpServletRequest request)
-    {
-        if (!isAdmin(request))
-        {
+    public CommonResult<Boolean> insert(@RequestBody User user, HttpServletRequest request) {
+        if (!isAdmin(request)) {
             throw new ResultException(ErrorCode.NOT_ADMIN);
         }
-        if (user==null)
-        {
+        if (user == null) {
             throw new ResultException(ErrorCode.NULL_ERROR);
         }
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.eq("username",user.getUsername());
-        userQueryWrapper.eq("userAccount",user.getUserAccount());
+        userQueryWrapper.eq("username", user.getUsername());
+        userQueryWrapper.eq("userAccount", user.getUserAccount());
         User one = userService.getOne(userQueryWrapper);
-        if (one!=null)
-        {
-        throw new ResultException(ErrorCode.REPEAT_ERROR);
+        if (one != null) {
+            throw new ResultException(ErrorCode.REPEAT_ERROR);
         }
         boolean save = userService.save(user);
         return ResultUtils.success(save);
     }
 
+    @GetMapping("/search/tags")
+    public CommonResult<List<CommonResult<User>>> searchUsersByTags(@RequestParam(required = false) List<String> tags) {
+        if(CollectionUtils.isEmpty(tags)){
+            throw new ResultException(ErrorCode.NULL_ERROR);
+        }
+        List<CommonResult<User>> userList = userService.searchUserByTags(tags);
+        return ResultUtils.success(userList);
+    }
 
 }

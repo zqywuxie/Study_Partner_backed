@@ -10,6 +10,7 @@ import java.util.Date;
 
 /**
  * 用户表
+ * @author wuxie
  * @TableName user
  */
 @ApiModel(description = "用户表")
