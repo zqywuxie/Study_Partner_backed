@@ -9,7 +9,10 @@ import com.example.studypartner.domain.request.RegisterInfo;
 import com.example.studypartner.exception.ResultException;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.ResultUtils;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
@@ -19,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.studypartner.constant.UserConstant.ADMIN_ROLE;
 import static com.example.studypartner.constant.UserConstant.User_Login_Status;
 
 /**
@@ -106,7 +108,7 @@ public class UserController {
     @ApiOperation(value = "删除接口", notes = "删除接口", httpMethod = "POST")
     @PostMapping("/delete")
     public CommonResult<Boolean> Delete(@RequestBody User user, HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!userService.isAdmin(request)) {
             throw new ResultException(ErrorCode.NOT_ADMIN);
         }
 
@@ -133,7 +135,7 @@ public class UserController {
     @ApiOperation(value = "根据用户名查询 管理接口", notes = "根据用户名查询 管理接口", httpMethod = "GET")
     @GetMapping("/search")
     public CommonResult<List<User>> users(String username, HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!userService.isAdmin(request)) {
             throw new ResultException(ErrorCode.NOT_ADMIN);
         }
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
@@ -146,24 +148,6 @@ public class UserController {
         return ResultUtils.success(userList);
     }
 
-    /**
-     * 校验用户权限
-     *
-     * @param request
-     * @return
-     */
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
-    })
-    @ApiOperation(value = "校验用户权限", notes = "校验用户权限")
-    public boolean isAdmin(HttpServletRequest request) {
-        Object attribute = request.getSession().getAttribute(User_Login_Status);
-        User user = (User) attribute;
-        if (user == null || user.getUserRole() != ADMIN_ROLE) {
-            return false;
-        }
-        return true;
-    }
 
     /**
      * 根据session获得当前用户数据
@@ -177,8 +161,7 @@ public class UserController {
     @ApiOperation(value = "根据session获得当前用户数据", notes = "根据session获得当前用户数据", httpMethod = "GET")
     @GetMapping("/current")
     public CommonResult<User> currentUser(HttpServletRequest request) {
-        Object attribute = request.getSession().getAttribute(User_Login_Status);
-        User currentUser = (User) attribute;
+        User currentUser = userService.getLoginUser(request);
         if (currentUser == null) {
             // throw new ResultException(ErrorCode.NULL_ERROR);
             return null;
@@ -219,15 +202,12 @@ public class UserController {
     })
     @ApiOperation(value = "更新数据", notes = "更新数据", httpMethod = "POST")
     @PostMapping("/change")
-    public CommonResult<Boolean> update(@RequestBody User user, HttpServletRequest request) {
-        if (!isAdmin(request)) {
-            throw new ResultException(ErrorCode.NOT_ADMIN);
-        }
+    public CommonResult<Integer> update(@RequestBody User user, HttpServletRequest request) {
         if (user == null) {
-            throw new ResultException(ErrorCode.NULL_ERROR);
+            throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
-
-        boolean result = userService.updateById(user);
+        User loginUser = userService.getLoginUser(request);
+        Integer result = userService.updateUser(user, loginUser);
         return ResultUtils.success(result);
     }
 
@@ -245,7 +225,7 @@ public class UserController {
     @ApiOperation(value = "添加数据", notes = "添加数据", httpMethod = "POST")
     @PostMapping("/insert")
     public CommonResult<Boolean> insert(@RequestBody User user, HttpServletRequest request) {
-        if (!isAdmin(request)) {
+        if (!userService.isAdmin(request)) {
             throw new ResultException(ErrorCode.NOT_ADMIN);
         }
         if (user == null) {
@@ -264,7 +244,7 @@ public class UserController {
 
     @GetMapping("/search/tags")
     public CommonResult<List<CommonResult<User>>> searchUsersByTags(@RequestParam(required = false) List<String> tags) {
-        if(CollectionUtils.isEmpty(tags)){
+        if (CollectionUtils.isEmpty(tags)) {
             throw new ResultException(ErrorCode.NULL_ERROR);
         }
         List<CommonResult<User>> userList = userService.searchUserByTags(tags);

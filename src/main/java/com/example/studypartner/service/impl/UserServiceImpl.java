@@ -46,14 +46,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
 
     @Override
-    public CommonResult<Long> Register(String usercount, String password, String checkPassword) {
+    public CommonResult<Long> Register(String useraccount, String password, String checkPassword) {
         // 信息不能为空
-        if (StringUtils.isAllBlank(usercount, password, checkPassword)) {
+        if (StringUtils.isAllBlank(useraccount, password, checkPassword)) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
 
         }
         // 账号大于4位
-        if (usercount.length() < 4) {
+        if (useraccount.length() < 4) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
 
         }
@@ -71,14 +71,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         // 账号不能有特殊符号
         String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
-        Matcher matcher = Pattern.compile(validPattern).matcher(usercount);
+        Matcher matcher = Pattern.compile(validPattern).matcher(useraccount);
         if (matcher.find()) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
 
         }
         // 查看账号是否有重复
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.eq("userAccount", usercount);
+        userQueryWrapper.eq("userAccount", useraccount);
         Long count = userMapper.selectCount(userQueryWrapper);
         if (count > 0) {
             throw new ResultException(ErrorCode.REPEAT_ERROR);
@@ -87,7 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
         // 插入数据
         User user = new User();
-        user.setUserAccount(usercount);
+        user.setUserAccount(useraccount);
         user.setUserPassword(encryptPassword);
         user.setAvatarUrl(Default_Avatar);
         user.setUsername(Default_Name);
@@ -203,6 +203,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     /**
      * 根据标签搜索用户 内存搜素法
+     *
      * @param tagNameList
      * @return
      */
@@ -230,6 +231,56 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         }).map(this::cleanUser).collect(Collectors.toList());
     }
+
+    @Override
+    public Integer updateUser(User user, User loginUser) {
+        //管理员可以更新任何用户信息
+        //非管理员只能更新自己的数据
+        Long id = user.getId();
+        if (id <= 0) {
+            throw new ResultException(ErrorCode.PARAMS_ERROR);
+        }
+
+        //todo 判断前端传入参数是否为空，是空那么就不进行  抛出异常
+        if (!isAdmin(loginUser) && !id.equals(loginUser.getId())) {
+            throw new ResultException(ErrorCode.NOT_ADMIN);
+        }
+        User selectUser = userMapper.selectById(id);
+        if (selectUser == null) {
+            throw new ResultException(ErrorCode.NULL_ERROR);
+        }
+        return userMapper.updateById(user);
+    }
+
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        if (request == null) {
+            return null;
+        }
+        Object attribute = request.getSession().getAttribute(User_Login_Status);
+        User currentUser = (User) attribute;
+        return currentUser;
+    }
+
+    /**
+     * 鉴权
+     *
+     * @param request
+     * @return
+     */
+
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+        Object attribute = request.getSession().getAttribute(User_Login_Status);
+        User user = (User) attribute;
+        return user != null || user.getUserRole().equals(ADMIN_ROLE);
+    }
+
+    @Override
+    public boolean isAdmin(User loginUser) {
+        return loginUser != null || loginUser.getUserRole().equals(ADMIN_ROLE);
+    }
+
 }
 
 
