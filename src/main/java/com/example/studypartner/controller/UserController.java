@@ -1,6 +1,7 @@
 package com.example.studypartner.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.common.ErrorCode;
 import com.example.studypartner.domain.User;
@@ -146,6 +147,25 @@ public class UserController {
         List<User> list = userService.list(userQueryWrapper);
         List<User> userList = list.stream().map(user -> userService.cleanUser(user).getData()).collect(Collectors.toList());
         return ResultUtils.success(userList);
+    }
+
+    /**
+     * 推荐用户
+     *
+     * @param username
+     * @param request
+     * @return
+     */
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "query", dataType = "string", name = "username", value = "", required = true),
+            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
+    })
+    @ApiOperation(value = "推荐用户接口", notes = "推荐用户接口", httpMethod = "GET")
+    @GetMapping("/recommend")
+    public CommonResult<Page<User>> recommend(long pageSize, long pageNum, HttpServletRequest request) {
+        QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+        Page<User> page = userService.page(new Page<>(pageNum, pageSize), userQueryWrapper);
+        return ResultUtils.success(page);
     }
 
 
