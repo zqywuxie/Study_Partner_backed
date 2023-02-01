@@ -14,13 +14,18 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.example.studypartner.constant.UserConstant.User_Login_Status;
@@ -36,10 +41,13 @@ import static com.example.studypartner.constant.UserConstant.User_Login_Status;
 @RestController
 @RequestMapping("/user")
 @CrossOrigin(origins = {"http://localhost:5173/"})
+@Slf4j
 public class UserController {
     @Autowired
     UserService userService;
 
+    @Resource
+    private RedisTemplate redisTemplate;
 
     /**
      * 登录接口
@@ -150,9 +158,10 @@ public class UserController {
     }
 
     /**
-     * 推荐用户
+     * 主页推荐用户
      *
-     * @param username
+     * @param pageSize
+     * @param pageNum
      * @param request
      * @return
      */
@@ -162,9 +171,26 @@ public class UserController {
     })
     @ApiOperation(value = "推荐用户接口", notes = "推荐用户接口", httpMethod = "GET")
     @GetMapping("/recommend")
+    /**
+     todo 后期优化 将业务逻辑写到service里面
+     * 
+     */
     public CommonResult<Page<User>> recommend(long pageSize, long pageNum, HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        String rediskey = String.format("wuxie:user:recommend:%s", loginUser.getId());
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        Page<User> userPage = (Page<User>) valueOperations.get(rediskey);
+        if (userPage != null) {
+            ResultUtils.success(userPage);
+        }
+//写缓存,并且设置缓存时间
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
         Page<User> page = userService.page(new Page<>(pageNum, pageSize), userQueryWrapper);
+        try {
+            valueOperations.set(rediskey, page, 30000, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.error("redis set key-value error");
+        }
         return ResultUtils.success(page);
     }
 
