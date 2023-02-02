@@ -14,7 +14,7 @@ spring:
     password: 123
     port: 6379
     host: localhost
-    database: 0
+    database: 1
   #  mvc:
   #    pathmatch:
   #      matching-strategy: ant_path_matcher
