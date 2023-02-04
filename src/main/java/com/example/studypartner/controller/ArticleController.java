@@ -5,7 +5,7 @@ import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.domain.Article;
 import com.example.studypartner.service.ArticleService;
 import com.example.studypartner.utils.ResultUtils;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 2022/10/18
- *
- * @version 1.0
- * @Author:zqy
+ * @author wuxie
+ * 文章数据接口
  */
-@Api(value = "ArticleController",tags = "文章接口")
+
+@Api(value = "/article", tags = {"文章数据接口"})
 @RestController
 @RequestMapping("/article")
 public class ArticleController {
@@ -32,10 +31,6 @@ public class ArticleController {
      * @param userAccount
      * @return
      */
-        @ApiImplicitParams({
-                @ApiImplicitParam(paramType = "query", dataType = "string", name = "userAccount", value = "", required = true)
-        })
-        @ApiOperation(value = "文章数据获取", notes = "文章数据获取", httpMethod = "GET")
         @GetMapping("/search")
     public CommonResult<List<Article>> article(String userAccount)
     {

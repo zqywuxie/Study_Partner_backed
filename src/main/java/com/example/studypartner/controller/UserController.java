@@ -11,9 +11,6 @@ import com.example.studypartner.exception.ResultException;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.ResultUtils;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +28,12 @@ import java.util.stream.Collectors;
 import static com.example.studypartner.constant.UserConstant.User_Login_Status;
 
 /**
- * 2022/10/11
- *
- * @version 1.0
- * @Author:zqy
+ * @author wuxie
+ * 用户数据接口
  */
-@Api(value = "UserController", tags = "用户接口")
 
+
+@Api(value = "/user", tags = {"用户数据接口"})
 @RestController
 @RequestMapping("/user")
 @CrossOrigin(origins = {"http://localhost:5173/"})
@@ -56,11 +52,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "body", dataType = "LoginInfo", name = "loginInfo", value = "", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
-    })
-    @ApiOperation(value = "登录接口", notes = "登录接口", httpMethod = "POST")
+
     @PostMapping("/login")
     public CommonResult<User> Login(@RequestBody LoginInfo loginInfo, HttpServletRequest request) {
         if (loginInfo == null) {
@@ -82,10 +74,7 @@ public class UserController {
      * @return
      */
 
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "body", dataType = "RegisterInfo", name = "registerInfo", value = "", required = true)
-    })
-    @ApiOperation(value = "注册接口", notes = "注册接口", httpMethod = "POST")
+
     @PostMapping("/register")
     public CommonResult<Long> Register(@RequestBody RegisterInfo registerInfo) {
         if (registerInfo == null) {
@@ -110,11 +99,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "body", dataType = "User", name = "user", value = "", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
-    })
-    @ApiOperation(value = "删除接口", notes = "删除接口", httpMethod = "POST")
+
     @PostMapping("/delete")
     public CommonResult<Boolean> Delete(@RequestBody User user, HttpServletRequest request) {
         if (!userService.isAdmin(request)) {
@@ -137,11 +122,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "string", name = "username", value = "", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
-    })
-    @ApiOperation(value = "根据用户名查询 管理接口", notes = "根据用户名查询 管理接口", httpMethod = "GET")
+
     @GetMapping("/search")
     public CommonResult<List<User>> users(String username, HttpServletRequest request) {
         if (!userService.isAdmin(request)) {
@@ -165,11 +146,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "string", name = "username", value = "", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
-    })
-    @ApiOperation(value = "推荐用户接口", notes = "推荐用户接口", httpMethod = "GET")
+
     @GetMapping("/recommend")
     /**
      todo 后期优化 将业务逻辑写到service里面
@@ -201,10 +178,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
-    })
-    @ApiOperation(value = "根据session获得当前用户数据", notes = "根据session获得当前用户数据", httpMethod = "GET")
+
     @GetMapping("/current")
     public CommonResult<User> currentUser(HttpServletRequest request) {
         User currentUser = userService.getLoginUser(request);
@@ -223,10 +197,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
-    })
-    @ApiOperation(value = "退出登录 删除用户登录态", notes = "退出登录 删除用户登录态", httpMethod = "POST")
+
     @PostMapping("/outLogin")
     public CommonResult<Integer> outLogin(HttpServletRequest request) {
         if (request == null) {
@@ -242,11 +213,7 @@ public class UserController {
      * @param user
      * @return
      */
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "body", dataType = "User", name = "user", value = "", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
-    })
-    @ApiOperation(value = "更新数据", notes = "更新数据", httpMethod = "POST")
+
     @PostMapping("/change")
     public CommonResult<Integer> update(@RequestBody User user, HttpServletRequest request) {
         if (user == null) {
@@ -264,11 +231,7 @@ public class UserController {
      * @param request
      * @return
      */
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "body", dataType = "User", name = "user", value = "", required = true),
-            @ApiImplicitParam(paramType = "query", dataType = "HttpServletRequest", name = "request", value = "", required = true)
-    })
-    @ApiOperation(value = "添加数据", notes = "添加数据", httpMethod = "POST")
+
     @PostMapping("/insert")
     public CommonResult<Boolean> insert(@RequestBody User user, HttpServletRequest request) {
         if (!userService.isAdmin(request)) {
@@ -287,6 +250,12 @@ public class UserController {
         boolean save = userService.save(user);
         return ResultUtils.success(save);
     }
+
+    /**
+     * 根据标签查询用户
+     * @param tags
+     * @return
+     */
 
     @GetMapping("/search/tags")
     public CommonResult<List<CommonResult<User>>> searchUsersByTags(@RequestParam(required = false) List<String> tags) {

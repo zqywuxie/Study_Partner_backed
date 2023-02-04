@@ -3,6 +3,12 @@ package com.example.studypartner.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.studypartner.domain.Team;
 import com.example.studypartner.domain.User;
+import com.example.studypartner.domain.dto.TeamDTO;
+import com.example.studypartner.domain.request.TeamJoinInfo;
+import com.example.studypartner.domain.request.TeamUpdateInfo;
+import com.example.studypartner.domain.vo.TeamUserVO;
+
+import java.util.List;
 
 /**
 * @author wuxie
@@ -12,4 +18,18 @@ import com.example.studypartner.domain.User;
 public interface TeamService extends IService<Team> {
 
     long addTeam(Team team, User loginUser);
+
+
+    /**
+     * 搜素队伍方法
+     * @param teamDTO
+     * @param isAdmin
+     * @return
+     */
+    List<TeamUserVO> listTeams(TeamDTO teamDTO,boolean isAdmin);
+
+    boolean updateTeam(TeamUpdateInfo teamUpdateInfo,User loginUser);
+
+
+    boolean joinTeam(TeamJoinInfo teamJoinInfo, User loginUser);
 }
