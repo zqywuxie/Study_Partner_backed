@@ -9,6 +9,7 @@ import com.example.studypartner.domain.User;
 import com.example.studypartner.domain.dto.TeamDTO;
 import com.example.studypartner.domain.request.TeamAddRequest;
 import com.example.studypartner.domain.request.TeamJoinRequest;
+import com.example.studypartner.domain.request.TeamQuitRequest;
 import com.example.studypartner.domain.request.TeamUpdateRequest;
 import com.example.studypartner.domain.vo.TeamUserVO;
 import com.example.studypartner.exception.ResultException;
@@ -168,5 +169,15 @@ public class TeamController {
 
     }
 
+
+    @PostMapping("/quit")
+    public CommonResult<Boolean> quitTeam(@RequestBody TeamQuitRequest teamQuitRequest, HttpServletRequest request) {
+        if (teamQuitRequest == null) {
+            throw new ResultException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        Boolean result= teamService.quitTeam(teamQuitRequest,loginUser);
+        return ResultUtils.success(result);
+    }
 
 }

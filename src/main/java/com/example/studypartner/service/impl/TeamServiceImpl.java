@@ -9,6 +9,7 @@ import com.example.studypartner.domain.UserTeam;
 import com.example.studypartner.domain.dto.TeamDTO;
 import com.example.studypartner.domain.enums.TeamStatus;
 import com.example.studypartner.domain.request.TeamJoinRequest;
+import com.example.studypartner.domain.request.TeamQuitRequest;
 import com.example.studypartner.domain.request.TeamUpdateRequest;
 import com.example.studypartner.domain.vo.TeamUserVO;
 import com.example.studypartner.domain.vo.UserVO;
@@ -284,9 +285,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
 
         //判断队伍用户是否已满
-        userTeamQueryWrapper = new QueryWrapper<>();
-        userTeamQueryWrapper.eq("teamId", teamId);
-        long userCount = userTeamService.count(userTeamQueryWrapper);
+        long userCount = getUserCount(teamId);
         if (userCount > team.getMaxNum()) {
             throw new ResultException(ErrorCode.NULL_ERROR, "队伍已满");
         }
@@ -305,6 +304,79 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         userTeam.setUserId(loginUserId);
         userTeam.setJoinTime(new Date());
         return userTeamService.save(userTeam);
+    }
+
+    /**
+     * 获取队伍当前人数
+     *
+     * @param teamId
+     * @return
+     */
+
+    private long getUserCount(Long teamId) {
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        userTeamQueryWrapper.eq("teamId", teamId);
+        return userTeamService.count(userTeamQueryWrapper);
+    }
+
+    @Override
+    public Boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser) {
+        if (teamQuitRequest == null) {
+            throw new ResultException(ErrorCode.PARAMS_ERROR);
+        }
+        Long teamId = teamQuitRequest.getTeamId();
+        if (teamId == null || teamId <= 0) {
+            throw new ResultException(ErrorCode.PARAMS_ERROR);
+        }
+        Team team = this.getById(teamId);
+        if (team == null) {
+            throw new ResultException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+        //判断用户是否加入队伍
+        Long userId = loginUser.getId();
+        UserTeam userTeam = new UserTeam();
+        userTeam.setTeamId(teamId);
+        userTeam.setUserId(userId);
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>(userTeam);
+        long count = userTeamService.count(userTeamQueryWrapper);
+        if (count == 0) {
+            throw new ResultException(ErrorCode.NULL_ERROR, "用户未加入该队伍");
+        }
+        long userCount = getUserCount(teamId);
+        //队伍只剩一人就解散队伍
+        //todo 是否添加队长标识
+        if (userCount == 1) {
+            this.removeById(teamId);
+            userTeamQueryWrapper = new QueryWrapper<>();
+            userTeamQueryWrapper.eq("teamId", teamId);
+            return userTeamService.remove(userTeamQueryWrapper);
+        } else {
+            //如果该用户是队长
+            if (team.getUserId().equals(userId)) {
+                userTeamQueryWrapper = new QueryWrapper<>();
+                userTeamQueryWrapper.eq("teamId", teamId);
+                userTeamQueryWrapper.last("order by id asc limit 2");
+                List<UserTeam> list = userTeamService.list(userTeamQueryWrapper);
+                if (CollectionUtils.isEmpty(list) || list.size() <= 1) {
+                    throw new ResultException(ErrorCode.SYSTEM_ERROR);
+                }
+                UserTeam nextUserTeam = list.get(1);
+                Long nextUserTeamUserId = nextUserTeam.getUserId();
+
+                //更新队伍信息
+                Team updateTeam = new Team();
+                updateTeam.setUserId(nextUserTeamUserId);
+                updateTeam.setId(teamId);
+                boolean result = this.updateById(updateTeam);
+                if (!result) {
+                    throw new ResultException(ErrorCode.SYSTEM_ERROR, "更新队长失败");
+                }
+            }
+        }
+        userTeamQueryWrapper = new QueryWrapper<>();
+        userTeamQueryWrapper.eq("teamId", teamId);
+        userTeamQueryWrapper.eq("userId", userId);
+        return userTeamService.remove(userTeamQueryWrapper);
     }
 }
 

@@ -5,6 +5,7 @@ import com.example.studypartner.domain.Team;
 import com.example.studypartner.domain.User;
 import com.example.studypartner.domain.dto.TeamDTO;
 import com.example.studypartner.domain.request.TeamJoinRequest;
+import com.example.studypartner.domain.request.TeamQuitRequest;
 import com.example.studypartner.domain.request.TeamUpdateRequest;
 import com.example.studypartner.domain.vo.TeamUserVO;
 
@@ -32,4 +33,6 @@ public interface TeamService extends IService<Team> {
 
 
     boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser);
+
+    Boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser);
 }
