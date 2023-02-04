@@ -7,9 +7,9 @@ import com.example.studypartner.common.ErrorCode;
 import com.example.studypartner.domain.Team;
 import com.example.studypartner.domain.User;
 import com.example.studypartner.domain.dto.TeamDTO;
-import com.example.studypartner.domain.request.TeamAddInfo;
-import com.example.studypartner.domain.request.TeamJoinInfo;
-import com.example.studypartner.domain.request.TeamUpdateInfo;
+import com.example.studypartner.domain.request.TeamAddRequest;
+import com.example.studypartner.domain.request.TeamJoinRequest;
+import com.example.studypartner.domain.request.TeamUpdateRequest;
 import com.example.studypartner.domain.vo.TeamUserVO;
 import com.example.studypartner.exception.ResultException;
 import com.example.studypartner.service.TeamService;
@@ -100,20 +100,20 @@ public class TeamController {
     /**
      * 添加队伍
      *
-     * @param teamAddInfo
+     * @param teamAddRequest
      * @param request
      * @return
      */
 
 
     @PostMapping("/add")
-    public CommonResult<Long> add(@RequestBody TeamAddInfo teamAddInfo, HttpServletRequest request) {
-        if (teamAddInfo == null) {
+    public CommonResult<Long> add(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest request) {
+        if (teamAddRequest == null) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
         Team team = new Team();
-        BeanUtils.copyProperties(teamAddInfo, team);
+        BeanUtils.copyProperties(teamAddRequest, team);
         long teamId = teamService.addTeam(team, loginUser);
         return ResultUtils.success(teamId);
     }
@@ -140,17 +140,17 @@ public class TeamController {
     /**
      * 更新队伍
      *
-     * @param teamUpdateInfo
+     * @param teamUpdateRequest
      * @return
      */
 
     @PostMapping("/update")
-    public CommonResult<Boolean> update(@RequestBody TeamUpdateInfo teamUpdateInfo, HttpServletRequest request) {
-        if (teamUpdateInfo == null) {
+    public CommonResult<Boolean> update(@RequestBody TeamUpdateRequest teamUpdateRequest, HttpServletRequest request) {
+        if (teamUpdateRequest == null) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
-        boolean save = teamService.updateTeam(teamUpdateInfo, loginUser);
+        boolean save = teamService.updateTeam(teamUpdateRequest, loginUser);
         if (!save) {
             throw new ResultException(ErrorCode.SYSTEM_ERROR, "更新错误");
         }
@@ -158,12 +158,12 @@ public class TeamController {
     }
 
     @PostMapping("/join")
-    public CommonResult<Boolean> joinTeam(@RequestBody TeamJoinInfo teamJoinInfo,HttpServletRequest request) {
-        if (teamJoinInfo == null) {
+    public CommonResult<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest, HttpServletRequest request) {
+        if (teamJoinRequest == null) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
-        boolean result = teamService.joinTeam(teamJoinInfo,loginUser);
+        boolean result = teamService.joinTeam(teamJoinRequest, loginUser);
         return ResultUtils.success(result);
 
     }

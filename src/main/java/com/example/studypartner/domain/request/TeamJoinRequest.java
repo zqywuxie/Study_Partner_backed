@@ -10,7 +10,7 @@ import java.io.Serializable;
  * @author wuxie
  */
 @Data
-public class TeamJoinInfo implements Serializable {
+public class TeamJoinRequest implements Serializable {
 
     private static final long serialVersionUID = -24663018187059425L;
 

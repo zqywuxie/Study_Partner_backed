@@ -5,8 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.common.ErrorCode;
 import com.example.studypartner.domain.User;
-import com.example.studypartner.domain.request.LoginInfo;
-import com.example.studypartner.domain.request.RegisterInfo;
+import com.example.studypartner.domain.request.LoginRequest;
+import com.example.studypartner.domain.request.RegisterRequest;
 import com.example.studypartner.exception.ResultException;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.ResultUtils;
@@ -48,18 +48,18 @@ public class UserController {
     /**
      * 登录接口
      *
-     * @param loginInfo
+     * @param loginRequest
      * @param request
      * @return
      */
 
     @PostMapping("/login")
-    public CommonResult<User> Login(@RequestBody LoginInfo loginInfo, HttpServletRequest request) {
-        if (loginInfo == null) {
+    public CommonResult<User> Login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        if (loginRequest == null) {
             throw new ResultException(ErrorCode.NULL_ERROR);
         }
-        String userAccount = loginInfo.getUserAccount();
-        String userPassword = loginInfo.getUserPassword();
+        String userAccount = loginRequest.getUserAccount();
+        String userPassword = loginRequest.getUserPassword();
         if (StringUtils.isAllBlank(userAccount, userPassword)) {
             throw new ResultException(ErrorCode.NULL_ERROR);
         }
@@ -70,20 +70,20 @@ public class UserController {
     /**
      * 注册接口
      *
-     * @param registerInfo
+     * @param registerRequest
      * @return
      */
 
 
     @PostMapping("/register")
-    public CommonResult<Long> Register(@RequestBody RegisterInfo registerInfo) {
-        if (registerInfo == null) {
+    public CommonResult<Long> Register(@RequestBody RegisterRequest registerRequest) {
+        if (registerRequest == null) {
             throw new ResultException(ErrorCode.NULL_ERROR);
 
         }
-        String userCount = registerInfo.getUserAccount();
-        String passWord = registerInfo.getUserPassword();
-        String checkPassword = registerInfo.getCheckPassword();
+        String userCount = registerRequest.getUserAccount();
+        String passWord = registerRequest.getUserPassword();
+        String checkPassword = registerRequest.getCheckPassword();
         if (StringUtils.isAllBlank(userCount, passWord, checkPassword)) {
             throw new ResultException(ErrorCode.NULL_ERROR);
 

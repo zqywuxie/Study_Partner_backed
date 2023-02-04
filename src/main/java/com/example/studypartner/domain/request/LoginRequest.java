@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @Author:zqy
  */
 @Data
-public class LoginInfo implements Serializable {
+public class LoginRequest implements Serializable {
     private static final long serialVersionUID = 1140279174545179366L;
     @ApiModelProperty("用户账号")
     private String userAccount;

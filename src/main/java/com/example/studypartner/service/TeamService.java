@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.studypartner.domain.Team;
 import com.example.studypartner.domain.User;
 import com.example.studypartner.domain.dto.TeamDTO;
-import com.example.studypartner.domain.request.TeamJoinInfo;
-import com.example.studypartner.domain.request.TeamUpdateInfo;
+import com.example.studypartner.domain.request.TeamJoinRequest;
+import com.example.studypartner.domain.request.TeamUpdateRequest;
 import com.example.studypartner.domain.vo.TeamUserVO;
 
 import java.util.List;
@@ -28,8 +28,8 @@ public interface TeamService extends IService<Team> {
      */
     List<TeamUserVO> listTeams(TeamDTO teamDTO,boolean isAdmin);
 
-    boolean updateTeam(TeamUpdateInfo teamUpdateInfo,User loginUser);
+    boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser);
 
 
-    boolean joinTeam(TeamJoinInfo teamJoinInfo, User loginUser);
+    boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser);
 }

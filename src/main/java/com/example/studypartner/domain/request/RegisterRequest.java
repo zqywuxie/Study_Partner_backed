@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @Author:zqy
  */
 @Data
-public class RegisterInfo implements Serializable {
+public class RegisterRequest implements Serializable {
     private static final long serialVersionUID = -2227307106629029499L;
     @ApiModelProperty("用户账号")
     private String userAccount;

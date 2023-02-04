@@ -8,8 +8,8 @@ import com.example.studypartner.domain.User;
 import com.example.studypartner.domain.UserTeam;
 import com.example.studypartner.domain.dto.TeamDTO;
 import com.example.studypartner.domain.enums.TeamStatus;
-import com.example.studypartner.domain.request.TeamJoinInfo;
-import com.example.studypartner.domain.request.TeamUpdateInfo;
+import com.example.studypartner.domain.request.TeamJoinRequest;
+import com.example.studypartner.domain.request.TeamUpdateRequest;
 import com.example.studypartner.domain.vo.TeamUserVO;
 import com.example.studypartner.domain.vo.UserVO;
 import com.example.studypartner.exception.ResultException;
@@ -206,11 +206,11 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public boolean updateTeam(TeamUpdateInfo teamUpdateInfo, User loginUser) {
-        if (teamUpdateInfo == null) {
+    public boolean updateTeam(TeamUpdateRequest teamUpdateRequest, User loginUser) {
+        if (teamUpdateRequest == null) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
-        Long id = teamUpdateInfo.getId();
+        Long id = teamUpdateRequest.getId();
         if (id == null || id <= 0) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
@@ -223,8 +223,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new ResultException(ErrorCode.NOT_ADMIN);
         }
         //队伍状态改为加密需要增加密码
-        Integer status = teamUpdateInfo.getStatus();
-        String password = teamUpdateInfo.getPassword();
+        Integer status = teamUpdateRequest.getStatus();
+        String password = teamUpdateRequest.getPassword();
         TeamStatus teamStatus = TeamStatus.getTeamStatus(status);
         //todo  原本加密改为加密后的优化
         if (teamStatus == TeamStatus.SECRET) {
@@ -234,18 +234,18 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
 
         Team team1 = new Team();
-        BeanUtils.copyProperties(teamUpdateInfo, team1);
+        BeanUtils.copyProperties(teamUpdateRequest, team1);
         return this.updateById(team1);
     }
 
     @Override
-    public boolean joinTeam(TeamJoinInfo teamJoinInfo, User loginUser) {
-        if (teamJoinInfo == null) {
+    public boolean joinTeam(TeamJoinRequest teamJoinRequest, User loginUser) {
+        if (teamJoinRequest == null) {
             throw new ResultException(ErrorCode.NULL_ERROR);
         }
 
         //队伍必须存在
-        Long teamId = teamJoinInfo.getTeamId();
+        Long teamId = teamJoinRequest.getTeamId();
         if (teamId == null || teamId <= 0) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
@@ -262,7 +262,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             throw new ResultException(ErrorCode.NULL_ERROR, "不能加入私人队伍");
         }
         //队伍状态是加密的，输入密码要比对
-        String password = teamJoinInfo.getPassword();
+        String password = teamJoinRequest.getPassword();
         if (TeamStatus.SECRET.equals(teamStatus)) {
             if (password == null || !password.equals(team.getPassword())) {
                 throw new ResultException(ErrorCode.NULL_ERROR, "密码不正确");
