@@ -5,6 +5,8 @@ import com.example.studypartner.domain.vo.UserVO;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 /**
  * 返回包装类
  *
@@ -53,5 +55,10 @@ public class TeamDTO extends PageRequest {
      * 创始人用户信息
      */
     UserVO userVO;
+
+    /**
+     * 加入队伍的id
+     */
+    private List<Long> idList;
 }
 

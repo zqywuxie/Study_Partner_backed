@@ -174,7 +174,10 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if (StringUtils.isNotBlank(searchText)) {
                 teamQueryWrapper.and(tq -> tq.like("name", searchText).or().like("description", searchText));
             }
-
+            List<Long> idList = teamDTO.getIdList();
+            if (!CollectionUtils.isEmpty(idList)){
+                teamQueryWrapper.in("id",idList);
+            }
 
         }
         //查询过期时间
