@@ -146,7 +146,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                 teamQueryWrapper.eq("description", description);
             }
             Integer status = teamDTO.getStatus();
-
+            if (status == null) {
+                status = 0;
+            }
             TeamStatus teamStatus = TeamStatus.getTeamStatus(status);
             if (teamStatus == null) {
                 teamStatus = TeamStatus.PUBLIC;
@@ -319,19 +321,19 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         return userTeamService.count(userTeamQueryWrapper);
     }
 
+    /**
+     * 退出队伍
+     * @param teamQuitRequest
+     * @param loginUser
+     * @return
+     */
     @Override
     public Boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser) {
         if (teamQuitRequest == null) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
         Long teamId = teamQuitRequest.getTeamId();
-        if (teamId == null || teamId <= 0) {
-            throw new ResultException(ErrorCode.PARAMS_ERROR);
-        }
-        Team team = this.getById(teamId);
-        if (team == null) {
-            throw new ResultException(ErrorCode.NULL_ERROR, "队伍不存在");
-        }
+        Team team = getTeamById(teamId);
         //判断用户是否加入队伍
         Long userId = loginUser.getId();
         UserTeam userTeam = new UserTeam();
@@ -347,9 +349,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         //todo 是否添加队长标识
         if (userCount == 1) {
             this.removeById(teamId);
-            userTeamQueryWrapper = new QueryWrapper<>();
-            userTeamQueryWrapper.eq("teamId", teamId);
-            return userTeamService.remove(userTeamQueryWrapper);
         } else {
             //如果该用户是队长
             if (team.getUserId().equals(userId)) {
@@ -377,6 +376,43 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         userTeamQueryWrapper.eq("teamId", teamId);
         userTeamQueryWrapper.eq("userId", userId);
         return userTeamService.remove(userTeamQueryWrapper);
+    }
+
+    /**
+     * 根据id 获取队伍
+     *
+     * @param teamId
+     * @return
+     */
+    private Team getTeamById(Long teamId) {
+        if (teamId == null || teamId <= 0) {
+            throw new ResultException(ErrorCode.PARAMS_ERROR);
+        }
+        Team team = this.getById(teamId);
+        if (team == null) {
+            throw new ResultException(ErrorCode.NULL_ERROR, "队伍不存在");
+        }
+        return team;
+    }
+
+    @Override
+    /**
+     删除动作开始前记得添加事务
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteTeam(Long id, User loginUser) {
+        Team team = getTeamById(id);
+        Long teamId = team.getId();
+        if (!team.getUserId().equals(loginUser.getId())) {
+            throw new ResultException(ErrorCode.NOT_ADMIN, "无访问权限");
+        }
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        userTeamQueryWrapper.eq("teamId", teamId);
+        boolean remove = userTeamService.remove(userTeamQueryWrapper);
+        if (!remove) {
+            throw new ResultException(ErrorCode.SYSTEM_ERROR, "解散队伍失败");
+        }
+        return this.removeById(teamId);
     }
 }
 

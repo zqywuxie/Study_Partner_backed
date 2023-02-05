@@ -127,15 +127,13 @@ public class TeamController {
      */
 
     @PostMapping("/delete")
-    public CommonResult<Boolean> delete(@RequestBody Long id) {
+    public CommonResult<Boolean> delete(@RequestBody Long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
-        boolean save = teamService.removeById(id);
-        if (!save) {
-            throw new ResultException(ErrorCode.SYSTEM_ERROR, "删除失败");
-        }
-        return ResultUtils.success(true);
+        User loginUser = userService.getLoginUser(request);
+        boolean result = teamService.deleteTeam(id, loginUser);
+        return ResultUtils.success(result);
     }
 
     /**
@@ -176,7 +174,7 @@ public class TeamController {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
-        Boolean result= teamService.quitTeam(teamQuitRequest,loginUser);
+        Boolean result = teamService.quitTeam(teamQuitRequest, loginUser);
         return ResultUtils.success(result);
     }
 
