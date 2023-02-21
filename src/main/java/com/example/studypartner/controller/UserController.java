@@ -154,6 +154,9 @@ public class UserController {
      */
     public CommonResult<Page<User>> recommend(long pageSize, long pageNum, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
+        if (loginUser==null){
+            throw  new ResultException(ErrorCode.NO_LOGIN);
+        }
         String rediskey = String.format("wuxie:user:recommend:%s", loginUser.getId());
         ValueOperations valueOperations = redisTemplate.opsForValue();
         Page<User> userPage = (Page<User>) valueOperations.get(rediskey);
@@ -183,8 +186,8 @@ public class UserController {
     public CommonResult<User> currentUser(HttpServletRequest request) {
         User currentUser = userService.getLoginUser(request);
         if (currentUser == null) {
-            // throw new ResultException(ErrorCode.NULL_ERROR);
-            return null;
+             throw new ResultException(ErrorCode.NO_LOGIN);
+//            return null;
         }
         Long id = currentUser.getId();
         User user = userService.getById(id);
