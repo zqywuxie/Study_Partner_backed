@@ -25,10 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author wuxie
@@ -175,8 +173,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
                 teamQueryWrapper.and(tq -> tq.like("name", searchText).or().like("description", searchText));
             }
             List<Long> idList = teamDTO.getIdList();
-            if (!CollectionUtils.isEmpty(idList)){
-                teamQueryWrapper.in("id",idList);
+            if (!CollectionUtils.isEmpty(idList)) {
+                teamQueryWrapper.in("id", idList);
             }
 
         }
@@ -208,6 +206,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             teamUserVOS.add(teamUserVO);
 
         }
+
         return teamUserVOS;
     }
 
@@ -326,6 +325,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
     /**
      * 退出队伍
+     *
      * @param teamQuitRequest
      * @param loginUser
      * @return
@@ -387,6 +387,8 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
      * @param teamId
      * @return
      */
+
+    //todo
     private Team getTeamById(Long teamId) {
         if (teamId == null || teamId <= 0) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);

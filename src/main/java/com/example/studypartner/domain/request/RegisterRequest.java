@@ -20,4 +20,10 @@ public class RegisterRequest implements Serializable {
     private String userPassword;
     @ApiModelProperty("核实密码")
     private String checkPassword;
+
+    @ApiModelProperty("头像地址")
+    private String avatarUrl;
+
+    @ApiModelProperty("用户名")
+    private String userName;
 }

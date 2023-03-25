@@ -25,7 +25,7 @@ public class RedissonConfig {
         config.useSingleServer()
                 .setAddress(redisAddress)
                 .setDatabase(1)
-                .setPassword("123");
+                .setPassword("wszqy123.");
         // 2. Create Redisson instance 实例
         RedissonClient redisson = Redisson.create(config);
         return redisson;

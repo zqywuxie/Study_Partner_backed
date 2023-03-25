@@ -3,17 +3,17 @@ spring:
     name: user-center
   datasource:
     username: root
-    password: 123
-    url: jdbc:mysql://localhost:3306/UserCenter?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    password: wszqy123.
+    url: jdbc:mysql://localhost:3306/usercenter?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     # 配置session的存储方式
   session:
     timeout: 86400
     store-type: redis
   redis:
-    password: 123
+    password: wszqy123.
     port: 6379
-    host: localhost
+    host: 43.143.226.184
     database: 1
   #  mvc:
   #    pathmatch:
@@ -31,3 +31,11 @@ server:
     session:
       cookie:
         domain: localhost
+
+aliyun:
+  oss:
+    file:
+      endpoint: xx
+      keyid: xx
+      keysecret: xx
+      bucketname: xx

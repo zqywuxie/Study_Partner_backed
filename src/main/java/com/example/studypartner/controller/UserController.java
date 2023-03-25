@@ -84,11 +84,13 @@ public class UserController {
         String userCount = registerRequest.getUserAccount();
         String passWord = registerRequest.getUserPassword();
         String checkPassword = registerRequest.getCheckPassword();
-        if (StringUtils.isAllBlank(userCount, passWord, checkPassword)) {
+        String avatarUrl = registerRequest.getAvatarUrl();
+        String userName = registerRequest.getUserName();
+        if (StringUtils.isAllBlank(userCount, passWord, checkPassword,avatarUrl,userName)) {
             throw new ResultException(ErrorCode.NULL_ERROR);
 
         }
-        long register = userService.Register(userCount, passWord, checkPassword).getData();
+        long register = userService.Register(userCount, passWord, checkPassword,avatarUrl,userName).getData();
         return ResultUtils.success(register);
     }
 

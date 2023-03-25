@@ -20,7 +20,7 @@ public interface UserService extends IService<User> {
      * @param checkPassword 校验密码
      * @return 返回用户id
      */
-     CommonResult<Long> Register(String usercount, String password, String checkPassword);
+     CommonResult<Long> Register(String usercount, String password, String checkPassword,String avatarUrl,String userName);
 
     /**
      *

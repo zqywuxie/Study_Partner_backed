@@ -46,51 +46,51 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
 
     @Override
-    public CommonResult<Long> Register(String useraccount, String password, String checkPassword) {
+    public CommonResult<Long> Register(String userAccount, String passWord, String checkPassword,String avatarUrl,String userName) {
         // 信息不能为空
-        if (StringUtils.isAllBlank(useraccount, password, checkPassword)) {
+        if (StringUtils.isAllBlank(userAccount, passWord, checkPassword,avatarUrl,userName)) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
 
         }
         // 账号大于4位
-        if (useraccount.length() < 4) {
+        if (userAccount.length() < 4) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
 
         }
         // 密码大于6位
-        if (password.length() < 6) {
+        if (passWord.length() < 6) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
 
 
         }
 
         // 密码与校验密码一致
-        if (!password.equals(checkPassword)) {
+        if (!passWord.equals(checkPassword)) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
 
         }
         // 账号不能有特殊符号
         String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
-        Matcher matcher = Pattern.compile(validPattern).matcher(useraccount);
+        Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
         if (matcher.find()) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
 
         }
         // 查看账号是否有重复
         QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-        userQueryWrapper.eq("userAccount", useraccount);
+        userQueryWrapper.eq("userAccount", userAccount);
         Long count = userMapper.selectCount(userQueryWrapper);
         if (count > 0) {
             throw new ResultException(ErrorCode.REPEAT_ERROR);
         }
         // 密码加密
-        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + passWord).getBytes());
         // 插入数据
         User user = new User();
-        user.setUserAccount(useraccount);
+        user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
-        user.setAvatarUrl(Default_Avatar);
-        user.setUsername(Default_Name);
+        user.setAvatarUrl(avatarUrl);
+        user.setUsername(userName);
         boolean saveResult = this.save(user);
         if (!saveResult) {
             return ResultUtils.failed(ErrorCode.INSERT_ERROR);

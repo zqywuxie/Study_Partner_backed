@@ -1,6 +1,7 @@
 package com.example.studypartner.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.common.ErrorCode;
@@ -22,7 +23,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -79,6 +83,7 @@ public class TeamController {
         User loginUser = userService.getLoginUser(request);
         teamDTO.setUserId(loginUser.getId());
         List<TeamUserVO> teams = teamService.listTeams(teamDTO, true);
+        queryTeamCount(request,teams);
         return ResultUtils.success(teams);
     }
 
@@ -97,6 +102,7 @@ public class TeamController {
         User loginUser = userService.getLoginUser(request);
         teamDTO.setUserId(loginUser.getId());
         List<TeamUserVO> teams = teamService.listTeams(teamDTO, true);
+        queryTeamCount(request,teams);
         return ResultUtils.success(teams);
     }
 
@@ -123,6 +129,7 @@ public class TeamController {
         teamDTO.setUserId(loginUser.getId());
         teamDTO.setIdList(idList);
         List<TeamUserVO> teamUserVOS = teamService.listTeams(teamDTO, true);
+        queryTeamCount(request,teamUserVOS);
         return ResultUtils.success(teamUserVOS);
     }
 
@@ -226,4 +233,44 @@ public class TeamController {
         return ResultUtils.success(result);
     }
 
+
+    /**
+     * 填充队伍人数字段
+     *
+     * @param request
+     * @param teamList
+     */
+    private void queryTeamCount(HttpServletRequest request, List<TeamUserVO> teamList) {
+        //条件查询出的队伍列表
+        List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        try {
+            User loginUser = userService.getLoginUser(request);
+            userTeamQueryWrapper.eq("userId", loginUser.getId());
+            userTeamQueryWrapper.in("teamId", teamIdList);
+            //已加入队伍集合
+            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+            //已加入的队伍的id集合
+            Set<Long> hasJoinTeamIdList = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+            teamList.forEach(team -> {
+                boolean hasJoin = hasJoinTeamIdList.contains(team.getId());
+                team.setHasJoin(hasJoin);
+            });
+        } catch (Exception e) {
+        }
+
+        List<UserTeam> userTeamJoinList = new ArrayList<>();
+        if(!CollectionUtils.isEmpty(teamIdList)){
+            QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
+            userTeamJoinQueryWrapper.in("teamId", teamIdList);
+            userTeamJoinList = userTeamService.list(userTeamJoinQueryWrapper);
+        }
+
+        //按每个队伍Id分组
+        Map<Long, List<UserTeam>> teamIdUserTeamList = userTeamJoinList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+
+        teamList.forEach(team -> {
+            team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(), new ArrayList<>()).size());
+        });
+    }
 }
