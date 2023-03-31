@@ -63,7 +63,7 @@ public class UserController {
         if (StringUtils.isAllBlank(userAccount, userPassword)) {
             throw new ResultException(ErrorCode.NULL_ERROR);
         }
-        User user = userService.Login(userAccount, userPassword, request).getData();
+        User user = userService.Login(userAccount, userPassword, request);
         return ResultUtils.success(user);
     }
 
@@ -86,11 +86,11 @@ public class UserController {
         String checkPassword = registerRequest.getCheckPassword();
         String avatarUrl = registerRequest.getAvatarUrl();
         String userName = registerRequest.getUserName();
-        if (StringUtils.isAllBlank(userCount, passWord, checkPassword,avatarUrl,userName)) {
+        if (StringUtils.isAllBlank(userCount, passWord, checkPassword, avatarUrl, userName)) {
             throw new ResultException(ErrorCode.NULL_ERROR);
 
         }
-        long register = userService.Register(userCount, passWord, checkPassword,avatarUrl,userName).getData();
+        long register = userService.Register(userCount, passWord, checkPassword, avatarUrl, userName);
         return ResultUtils.success(register);
     }
 
@@ -136,7 +136,7 @@ public class UserController {
             userQueryWrapper.like("username", username);
         }
         List<User> list = userService.list(userQueryWrapper);
-        List<User> userList = list.stream().map(user -> userService.cleanUser(user).getData()).collect(Collectors.toList());
+        List<User> userList = list.stream().map(user -> userService.cleanUser(user)).collect(Collectors.toList());
         return ResultUtils.success(userList);
     }
 
@@ -152,12 +152,12 @@ public class UserController {
     @GetMapping("/recommend")
     /**
      todo 后期优化 将业务逻辑写到service里面
-     * 
+     *
      */
     public CommonResult<Page<User>> recommend(long pageSize, long pageNum, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
-        if (loginUser==null){
-            throw  new ResultException(ErrorCode.NO_LOGIN);
+        if (loginUser == null) {
+            throw new ResultException(ErrorCode.NO_LOGIN);
         }
         String rediskey = String.format("wuxie:user:recommend:%s", loginUser.getId());
         ValueOperations valueOperations = redisTemplate.opsForValue();
@@ -188,7 +188,7 @@ public class UserController {
     public CommonResult<User> currentUser(HttpServletRequest request) {
         User currentUser = userService.getLoginUser(request);
         if (currentUser == null) {
-             throw new ResultException(ErrorCode.NO_LOGIN);
+            throw new ResultException(ErrorCode.NO_LOGIN);
 //            return null;
         }
         Long id = currentUser.getId();
@@ -225,6 +225,7 @@ public class UserController {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
+        System.out.println(user);
         Integer result = userService.updateUser(user, loginUser);
         return ResultUtils.success(result);
     }
@@ -258,17 +259,31 @@ public class UserController {
 
     /**
      * 根据标签查询用户
+     *
      * @param tags
      * @return
      */
 
     @GetMapping("/search/tags")
-    public CommonResult<List<CommonResult<User>>> searchUsersByTags(@RequestParam(required = false) List<String> tags) {
+    public CommonResult<List<User>> searchUsersByTags(@RequestParam(required = false) List<String> tags) {
         if (CollectionUtils.isEmpty(tags)) {
             throw new ResultException(ErrorCode.NULL_ERROR);
         }
-        List<CommonResult<User>> userList = userService.searchUserByTags(tags);
+        List<User> userList = userService.searchUserByTags(tags);
         return ResultUtils.success(userList);
+    }
+
+    @GetMapping("/match")
+    public CommonResult<List<User>> matchUsers(long num, HttpServletRequest request) {
+        if (num <= 0 || num > 20) {
+            throw new ResultException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser==null){
+            throw new ResultException(ErrorCode.NO_LOGIN);
+        }
+        return ResultUtils.success(userService.matchUsers(num, loginUser));
+
     }
 
 }

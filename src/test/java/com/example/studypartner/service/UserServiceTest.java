@@ -120,14 +120,14 @@ class UserServiceTest {
 
     @Test
     void serachUserByTags() {
-        List<String> java = Arrays.asList("java","python");
-        List<CommonResult<User>> commonResults = userService.memorySearch(java);
+        List<String> java = Arrays.asList("java", "python");
+        List<User> commonResults = userService.memorySearch(java);
         System.out.println(commonResults);
         Assert.assertNotNull(commonResults);
     }
 
     @Test
-    void say(){
+    void say() {
 
     }
 }

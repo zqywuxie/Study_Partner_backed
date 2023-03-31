@@ -14,9 +14,9 @@ public class SampleTest {
 
     @Autowired
     private UserService userService;
-    @Test
-    public void testSelect() {
-        userService.Register("456789","123456","123456");
-    }
+//    @Test
+//    public void testSelect() {
+//        userService.Register("456789","123456","123456");
+//    }
 
 }

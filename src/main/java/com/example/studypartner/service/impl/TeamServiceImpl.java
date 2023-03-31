@@ -25,7 +25,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -419,6 +422,47 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         return this.removeById(teamId);
     }
+
+    @Override
+    public TeamUserVO getTeamById(long id, boolean isAdmin, User loginUser) {
+        if (id <= 0) {
+            throw new ResultException(ErrorCode.PARAMS_ERROR);
+        }
+        Team team = this.getById(id);
+
+        Long teamId = team.getId();
+        Long userId = team.getUserId();
+
+        TeamUserVO teamUserVo = new TeamUserVO();
+        BeanUtils.copyProperties(team, teamUserVo);
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        userTeamQueryWrapper.eq("teamId", teamId);
+        List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+        //设置已加入人数
+        teamUserVo.setHasJoinNum(userTeamList.size());
+        List<UserVO> memberUser = userTeamList.stream().map(userTeam -> {
+            Long memberId = userTeam.getUserId();
+            User user = userService.getById(memberId);
+            UserVO userVo = new UserVO();
+            BeanUtils.copyProperties(user, userVo);
+            if (memberId.equals(userId)) {
+                //设置创建人信息
+                teamUserVo.setCreateUser(userVo);
+            }
+            if (loginUser.getId().equals(memberId)) {
+                teamUserVo.setHasJoin(true);
+            }
+            return userVo;
+        }).collect(Collectors.toList());
+
+        if (!(TeamStatus.PUBLIC.getValue() == team.getStatus()) && !teamUserVo.isHasJoin()) {
+            throw new ResultException(ErrorCode.NOT_ADMIN, "无权限");
+        }
+        //设置队伍成员
+        teamUserVo.setJoinUserList(memberUser);
+        return teamUserVo;
+    }
+
 }
 
 

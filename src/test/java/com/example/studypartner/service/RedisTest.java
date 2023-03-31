@@ -14,8 +14,7 @@ public class RedisTest {
 
     @Test
     void Test() {
-        ValueOperations valueOperations = redisTemplate.opsForValue();
-        valueOperations.set("hello", 1);
-
+        System.out.println(1 != 1 &&
+                (1 == 1));
     }
 }

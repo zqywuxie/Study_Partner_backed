@@ -1,19 +1,22 @@
 package com.example.studypartner.domain.vo;
 
+import com.example.studypartner.domain.vo.UserVO;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
- * 队伍和用户信息封装类（脱敏）
- *
- * @author yupi
+ * @author niumazlb
+ * @create 2022-08-29 20:23
  */
 @Data
 public class TeamUserVO implements Serializable {
 
-    private static final long serialVersionUID = -164225590283924240L;
+
+    private static final long serialVersionUID = 7389362995098717607L;
     /**
      * id
      */
@@ -30,6 +33,16 @@ public class TeamUserVO implements Serializable {
     private String description;
 
     /**
+     * 公告
+     */
+    private String announce;
+
+    /**
+     * 头像
+     */
+    private String avatarUrl;
+
+    /**
      * 最大人数
      */
     private Integer maxNum;
@@ -37,17 +50,23 @@ public class TeamUserVO implements Serializable {
     /**
      * 过期时间
      */
+    @JsonFormat(shape=JsonFormat.Shape.STRING,pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date expireTime;
 
     /**
-     * 用户id
+     * 创建人
      */
-    private Long userId;
+    private UserVO createUser;
+    /**
+     * 创建人
+     */
+    private long userId;
 
     /**
      * 0 - 公开，1 - 私有，2 - 加密
      */
     private Integer status;
+
 
     /**
      * 创建时间
@@ -60,17 +79,14 @@ public class TeamUserVO implements Serializable {
     private Date updateTime;
 
     /**
-     * 创建人用户信息
-     */
-    private UserVO createUser;
-
-    /**
      * 已加入的用户数
      */
-    private Integer hasJoinNum;
+    private Integer hasJoinNum = 0;
 
     /**
-     * 是否已加入队伍
+     * 已加入用户列表
      */
-    private boolean hasJoin = false;
+    private List<UserVO> joinUserList;
+
+    private boolean hasJoin;
 }

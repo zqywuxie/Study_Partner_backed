@@ -57,15 +57,18 @@ public class TeamController {
      */
 
     @GetMapping("/get")
-    public CommonResult<Team> searchOne(Long id) {
+    public CommonResult<TeamUserVO> searchOne(Long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
-        Team team = teamService.getById(id);
-        if (team == null) {
-            throw new ResultException(ErrorCode.SYSTEM_ERROR, "查找失败");
+        User loginUser = userService.getLoginUser(request);
+
+        TeamUserVO teamUserVo = teamService.getTeamById(id, true, loginUser);
+
+        if (teamUserVo == null) {
+            throw new ResultException(ErrorCode.NULL_ERROR);
         }
-        return ResultUtils.success(team);
+        return ResultUtils.success(teamUserVo);
     }
 
 
@@ -83,7 +86,7 @@ public class TeamController {
         User loginUser = userService.getLoginUser(request);
         teamDTO.setUserId(loginUser.getId());
         List<TeamUserVO> teams = teamService.listTeams(teamDTO, true);
-        queryTeamCount(request,teams);
+        queryTeamCount(request, teams);
         return ResultUtils.success(teams);
     }
 
@@ -102,7 +105,7 @@ public class TeamController {
         User loginUser = userService.getLoginUser(request);
         teamDTO.setUserId(loginUser.getId());
         List<TeamUserVO> teams = teamService.listTeams(teamDTO, true);
-        queryTeamCount(request,teams);
+        queryTeamCount(request, teams);
         return ResultUtils.success(teams);
     }
 
@@ -129,7 +132,7 @@ public class TeamController {
         teamDTO.setUserId(loginUser.getId());
         teamDTO.setIdList(idList);
         List<TeamUserVO> teamUserVOS = teamService.listTeams(teamDTO, true);
-        queryTeamCount(request,teamUserVOS);
+        queryTeamCount(request, teamUserVOS);
         return ResultUtils.success(teamUserVOS);
     }
 
@@ -182,7 +185,7 @@ public class TeamController {
 
     @PostMapping("/delete")
     public CommonResult<Boolean> delete(@RequestBody TeamDeleteRequest teamDeleteRequest, HttpServletRequest request) {
-        if (teamDeleteRequest==null||teamDeleteRequest.getTeamId()<=0) {
+        if (teamDeleteRequest == null || teamDeleteRequest.getTeamId() <= 0) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
         Long teamId = teamDeleteRequest.getTeamId();
@@ -260,7 +263,7 @@ public class TeamController {
         }
 
         List<UserTeam> userTeamJoinList = new ArrayList<>();
-        if(!CollectionUtils.isEmpty(teamIdList)){
+        if (!CollectionUtils.isEmpty(teamIdList)) {
             QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
             userTeamJoinQueryWrapper.in("teamId", teamIdList);
             userTeamJoinList = userTeamService.list(userTeamJoinQueryWrapper);

@@ -8,36 +8,35 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
-* @author 思无邪
-* @description 针对表【user(用户表)】的数据库操作Service
-* @createDate 2022-10-10 16:54:41
-*/
+ * @author 思无邪
+ * @description 针对表【user(用户表)】的数据库操作Service
+ * @createDate 2022-10-10 16:54:41
+ */
 public interface UserService extends IService<User> {
     /**
-     *
-     * @param usercount 账号
-     * @param password 账号密码
+     * @param usercount     账号
+     * @param password      账号密码
      * @param checkPassword 校验密码
      * @return 返回用户id
      */
-     CommonResult<Long> Register(String usercount, String password, String checkPassword,String avatarUrl,String userName);
+    Long Register(String usercount, String password, String checkPassword, String avatarUrl, String userName);
 
     /**
-     *
      * @param userAccount
      * @param userPassword
      * @param request
      * @return
      */
-     CommonResult<User> Login(String userAccount, String userPassword, HttpServletRequest request);
+    User Login(String userAccount, String userPassword, HttpServletRequest request);
 
 
     /**
      * 用户信息脱敏
+     *
      * @param user
      * @return
      */
-     CommonResult<User> cleanUser(User user);
+    User cleanUser(User user);
 
 
     /**
@@ -46,30 +45,35 @@ public interface UserService extends IService<User> {
      * @param tagNameList
      * @return
      */
-    List<CommonResult<User>> searchUserByTags(List<String> tagNameList);
+    List<User> searchUserByTags(List<String> tagNameList);
 
-    List<CommonResult<User>> memorySearch(List<String> tagNameList);
+    List<User> memorySearch(List<String> tagNameList);
 
     /**
      * 更新数据
+     *
      * @param user
      * @param loginUser
      * @return
      */
-    Integer updateUser(User user,User loginUser);
+    Integer updateUser(User user, User loginUser);
 
     /**
      * 获得当前用户信息
+     *
      * @return
      */
     User getLoginUser(HttpServletRequest request);
 
     /**
      * 鉴权
+     *
      * @param request
      * @return
      */
     boolean isAdmin(HttpServletRequest request);
 
     boolean isAdmin(User loginUser);
+
+    List<User> matchUsers(long num, User loginUser);
 }
