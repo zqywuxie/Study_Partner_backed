@@ -164,7 +164,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.3.7.RELEASE</version>
                 <configuration>
-                    <mainClass>com.example.usercenterback.UserCenterBackApplication</mainClass>
+                    <mainClass>com.example.studypartner.StudyPartnerApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>

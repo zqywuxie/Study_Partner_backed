@@ -30,7 +30,9 @@ server:
     context-path: /api
     session:
       cookie:
-        domain: localhost
+        domain: https://springboot-8xuy-37303-4-1317328802.sh.run.tcloudbase.com
+        same-site: lax
+        secure: false
 
 aliyun:
   oss:
