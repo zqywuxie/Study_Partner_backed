@@ -36,7 +36,7 @@ import static com.example.studypartner.constant.UserConstant.User_Login_Status;
 @Api(value = "/user", tags = {"用户数据接口"})
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:5173/"})
+@CrossOrigin(origins = {"https://www.zqyyouxie.ren/"},allowCredentials = "true")
 @Slf4j
 public class UserController {
     @Autowired

@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 public class RedissonConfig {
     private String host;
     private String port;
+    private String password;
     @Bean
     public RedissonClient redissonClient() {
         // 1. Create config object 配置
@@ -25,7 +26,7 @@ public class RedissonConfig {
         config.useSingleServer()
                 .setAddress(redisAddress)
                 .setDatabase(1)
-                .setPassword("wszqy123.");
+                .setPassword(password);
         // 2. Create Redisson instance 实例
         RedissonClient redisson = Redisson.create(config);
         return redisson;

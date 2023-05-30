@@ -41,7 +41,8 @@ public class OssServiceImpl implements OssService {
             String fileName = file.getOriginalFilename();
             //添加随机值
             String uuid = UUID.randomUUID().toString().replaceAll("-", "");
-            fileName = uuid + fileName;
+            //todo filename
+//            fileName = uuid + fileName;
 
 
             //把文件按照日期分类

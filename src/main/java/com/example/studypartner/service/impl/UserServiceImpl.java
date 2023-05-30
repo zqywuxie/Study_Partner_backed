@@ -2,6 +2,8 @@ package com.example.studypartner.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.common.ErrorCode;
 import com.example.studypartner.domain.User;
@@ -10,16 +12,19 @@ import com.example.studypartner.mapper.UserMapper;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.AlgorithmUtils;
 import com.example.studypartner.utils.ResultUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.util.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -39,6 +44,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService {
     @Autowired
     UserMapper userMapper;
+
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Resource
+    private ObjectMapper objectMapper;
 
     // 加密盐值
     public static final String SALT = "zqy";
@@ -98,7 +109,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public User Login(String userAccount, String userPassword, HttpServletRequest request) {
+    public User Login(String userAccount, String userPassword, HttpServletRequest request)  {
         // 1.数据校验
         // 信息不能为空
         if (StringUtils.isAllBlank(userAccount, userPassword)) {
@@ -142,6 +153,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new ResultException(ErrorCode.NULL_ERROR);
         }
         User cleanUser = cleanUser(user);
+//        String key = "currentUser";
+//        String s = objectMapper.writeValueAsString(user);
+//        stringRedisTemplate.opsForValue().set(key, s);
         request.getSession().setAttribute(User_Login_Status, cleanUser);
         return cleanUser;
     }
