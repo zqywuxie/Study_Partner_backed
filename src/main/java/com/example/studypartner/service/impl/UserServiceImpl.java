@@ -281,8 +281,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             return null;
         }
         Object attribute = request.getSession().getAttribute(User_Login_Status);
-        User currentUser = (User) attribute;
-        return currentUser;
+        return (User) attribute;
     }
 
     /**

@@ -36,7 +36,9 @@ import static com.example.studypartner.constant.UserConstant.User_Login_Status;
 @Api(value = "/user", tags = {"用户数据接口"})
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"https://www.zqyyouxie.ren/"},allowCredentials = "true")
+// todo 跨域
+//@CrossOrigin(origins = {"https://www.zqywuku.top/"},allowCredentials = "true")
+@CrossOrigin(origins = {"http://localhost:5173"}, allowCredentials = "true")
 @Slf4j
 public class UserController {
     @Autowired
@@ -279,7 +281,7 @@ public class UserController {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
-        if (loginUser==null){
+        if (loginUser == null) {
             throw new ResultException(ErrorCode.NO_LOGIN);
         }
         return ResultUtils.success(userService.matchUsers(num, loginUser));

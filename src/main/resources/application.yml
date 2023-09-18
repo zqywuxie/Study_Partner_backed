@@ -31,7 +31,6 @@ server:
     session:
       cookie:
         domain: localhost
-        same-site: none
         secure: true
 
 # 阿里云OSS配置，图片上传使用

@@ -1,3 +1,4 @@
+create database usercenter;
 create table tag
 (
     id         bigint auto_increment comment 'id'

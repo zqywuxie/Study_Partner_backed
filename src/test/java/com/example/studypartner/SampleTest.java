@@ -1,8 +1,10 @@
 package com.example.studypartner;
 
+import com.example.studypartner.domain.vo.TeamUserVO;
 import com.example.studypartner.mapper.UserMapper;
 import com.example.studypartner.service.OssService;
 import com.example.studypartner.service.QiniuCloud;
+import com.example.studypartner.service.TeamService;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.service.impl.QiniuCloudUtil;
 import org.apache.commons.fileupload.FileItem;
@@ -14,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.annotation.Resource;
 import java.io.*;
+import java.util.List;
 
 @SpringBootTest
 public class SampleTest {
@@ -23,6 +26,9 @@ public class SampleTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TeamService teamService;
 
     @Resource
     private OssService ossService;
@@ -70,4 +76,10 @@ public class SampleTest {
         }
         return item;
     }
+
+//    @Test
+//    private List<TeamUserVO> search () {
+//        teamService.listTeams()
+//    }
+
 }

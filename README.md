@@ -124,6 +124,36 @@ aliyun:
 
 
 
+## 部署
+
+![image-20230918190150746](https://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/09/017/image-20230918190150746.png)
+
+
+
+![image-20230918190324669](https://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/09/017/image-20230918190324669.png)
+
+
+
+![image-20230918190451956](https://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/09/017/image-20230918190451956.png)
+
+如果前端要进行跳转路由，就在配置文件里面添加如下代码
+
+![image-20230918190546133](https://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/09/017/image-20230918190546133.png)
+
+```nginx
+location / {
+    try_files $uri $uri/ @router;#需要指向下面的@router否则会出现vue的路由在nginx中刷新出现404
+    index  index.html index.htm;
+}
+#对应上面的@router，主要原因是路由的路径资源并不是一个真实的路径，所以无法找到具体的文件
+#因此需要rewrite到index.html中，然后交给路由在处理请求资源
+location @router {
+    rewrite ^.*$ /index.html last;
+}
+```
+
+
+
 
 
 ## 项目展示

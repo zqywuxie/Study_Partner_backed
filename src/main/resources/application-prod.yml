@@ -30,7 +30,7 @@ server:
     context-path: /api
     session:
       cookie:
-        domain: zqyyouxie.ren
+        domain: zqywuku.top
 
 aliyun:
   oss:
