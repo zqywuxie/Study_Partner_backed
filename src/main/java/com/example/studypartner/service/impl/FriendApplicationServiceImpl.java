@@ -21,7 +21,6 @@ import com.example.studypartner.service.UserService;
 import com.google.gson.Gson;
 
 import com.google.gson.reflect.TypeToken;
-import jdk.internal.joptsimple.internal.Messages;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -75,7 +74,6 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 	 */
 	@Override
 	public boolean addFriendRecords(User loginUser, FriendAddRequest friendAddRequest) {
-		Long id = friendAddRequest.getId();
 		Long receiveId = friendAddRequest.getReceiveId();
 		String remark = friendAddRequest.getRemark();
 		Long loginUserId = loginUser.getId();
@@ -117,15 +115,14 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 				}
 				newFriend.setCreateTime(new Date());
 
-				// 添加消息
+				// todo 添加消息
 				Message message = new Message();
 				message.setType(MessageTypeEnum.FRIEND_APPLICATION.getValue());
 				message.setFromId(loginUserId);
 				message.setToId(receiveId);
-				//todo
-				message.setData(String.valueOf(receiveId));
+				message.setData(newFriend.getRemark());
 				messageService.save(message);
-				String likeNumKey = MESSAGE_COMMENT_NUM_KEY + loginUserId;
+				String likeNumKey = MESSAGE_COMMENT_NUM_KEY + receiveId;
 				Boolean hasKey = redisTemplate.hasKey(likeNumKey);
 				if (Boolean.TRUE.equals(hasKey)) {
 					redisTemplate.opsForValue().increment(likeNumKey);

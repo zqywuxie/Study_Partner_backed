@@ -4,10 +4,13 @@ package com.example.studypartner.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.studypartner.domain.entity.Follow;
+import com.example.studypartner.domain.entity.Message;
 import com.example.studypartner.domain.entity.User;
+import com.example.studypartner.domain.enums.MessageTypeEnum;
 import com.example.studypartner.domain.vo.UserVO;
 import com.example.studypartner.mapper.FollowMapper;
 import com.example.studypartner.service.FollowService;
+import com.example.studypartner.service.MessageService;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.ResultUtils;
 import org.springframework.beans.BeanUtils;
@@ -22,8 +25,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.example.studypartner.constant.RedisConstants.FANS_COUNT_KEY;
-import static com.example.studypartner.constant.RedisConstants.FOLLOW_COUNT_KEY;
+import static com.example.studypartner.constant.RedisConstants.*;
 
 /**
  * @author wuxie
@@ -37,6 +39,9 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 	@Resource
 	@Lazy
 	private UserService userService;
+
+	@Resource
+	private MessageService messageService;
 
 
 	@Resource
@@ -52,6 +57,20 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 			follow.setFollowUserId(userId);
 			follow.setUserId(followUserId);
 			this.save(follow);
+
+			Message message = new Message();
+			message.setType(MessageTypeEnum.FRIEND_APPLICATION.getValue());
+			message.setFromId(userId);
+			message.setToId(followUserId);
+			message.setData(String.valueOf(followUserId));
+			messageService.save(message);
+			String likeNumKey = MESSAGE_FOLLOW_MESSAGES_KEY + followUserId;
+			Boolean hasKey = redisTemplate.hasKey(likeNumKey);
+			if (Boolean.TRUE.equals(hasKey)) {
+				redisTemplate.opsForValue().increment(likeNumKey);
+			} else {
+				redisTemplate.opsForValue().set(likeNumKey, "1");
+			}
 		} else {
 			this.remove(followLambdaQueryWrapper);
 		}

@@ -55,25 +55,26 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 	@Override
 	@Transactional
 	public void addComment(CommentsAddRequest addCommentRequest, Long userId) {
-		Comments Comments = new Comments();
-		Comments.setUserId(userId);
-		Comments.setBlogId(addCommentRequest.getBlogId());
-		Comments.setContent(addCommentRequest.getContent());
-		Comments.setLikedNum(0);
-		Comments.setStatus(0);
-		this.save(Comments);
+		Comments comments = new Comments();
+		comments.setUserId(userId);
+		comments.setBlogId(addCommentRequest.getBlogId());
+		comments.setContent(addCommentRequest.getContent());
+		comments.setLikedNum(0);
+		comments.setStatus(0);
+		this.save(comments);
 		Blog blog = blogService.getById(addCommentRequest.getBlogId());
 		LambdaUpdateWrapper<Blog> blogLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
 		blogLambdaUpdateWrapper.eq(Blog::getId, addCommentRequest.getBlogId())
 				.set(Blog::getCommentsNum, blog.getCommentsNum() + 1);
 		blogService.update(blogLambdaUpdateWrapper);
 
-		// 添加消息
+		// todo 添加消息
 		Message message = new Message();
 		message.setType(MessageTypeEnum.COMMENT_ADD.getValue());
 		message.setFromId(userId);
 		message.setToId(blog.getUserId());
-		message.setData(String.valueOf(blog.getId()));
+		//添加评论内容
+		message.setData(addCommentRequest.getContent());
 		messageService.save(message);
 		String likeNumKey = MESSAGE_COMMENT_NUM_KEY + blog.getUserId();
 		Boolean hasKey = redisTemplate.hasKey(likeNumKey);
@@ -89,10 +90,10 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 	public List<CommentsVO> listComments(long blogId, long userId) {
 		LambdaQueryWrapper<Comments> CommentsLambdaQueryWrapper = new LambdaQueryWrapper<>();
 		CommentsLambdaQueryWrapper.eq(Comments::getBlogId, blogId);
-		List<Comments> CommentsList = this.list(CommentsLambdaQueryWrapper);
-		return CommentsList.stream().map((comment) -> {
-			CommentsVO CommentsVO = new CommentsVO();
-			BeanUtils.copyProperties(comment, CommentsVO);
+		List<Comments> list = this.list(CommentsLambdaQueryWrapper);
+		return list.stream().map((comment) -> {
+			CommentsVO commentsVO = new CommentsVO();
+			BeanUtils.copyProperties(comment, commentsVO);
 
 			User user = userService.getById(comment.getUserId());
 			if (user == null) {
@@ -100,13 +101,13 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 			}
 			UserVO userVO = new UserVO();
 			BeanUtils.copyProperties(user, userVO);
-			CommentsVO.setCommentUser(userVO);
+			commentsVO.setCommentUser(userVO);
 
 			LambdaQueryWrapper<CommentLike> commentLikeLambdaQueryWrapper = new LambdaQueryWrapper<>();
 			commentLikeLambdaQueryWrapper.eq(CommentLike::getCommentId, comment.getId()).eq(CommentLike::getUserId, userId);
 			long count = commentLikeService.count(commentLikeLambdaQueryWrapper);
-			CommentsVO.setIsLiked(count > 0);
-			return CommentsVO;
+			commentsVO.setIsLiked(count > 0);
+			return commentsVO;
 		}).collect(Collectors.toList());
 	}
 
@@ -163,7 +164,7 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 			message.setType(MessageTypeEnum.BLOG_COMMENT_LIKE.getValue());
 			message.setFromId(userId);
 			message.setToId(comments.getUserId());
-			message.setData(String.valueOf(comments.getId()));
+			message.setData(String.valueOf(comments.getContent()));
 			messageService.save(message);
 		} else {
 			commentLikeService.remove(commentLikeLambdaQueryWrapper);

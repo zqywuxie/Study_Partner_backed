@@ -154,12 +154,12 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 			this.update().eq("id", blogId).set("likedNum", newNum).update();
 			stringRedisTemplate.opsForValue().increment(key);
 
-			// 添加点赞消息
+			// todo 添加点赞消息
 			Message message = new Message();
 			message.setType(MessageTypeEnum.BLOG_LIKE.getValue());
 			message.setFromId(userId);
 			message.setToId(blog.getUserId());
-			message.setData(String.valueOf(blog.getId()));
+			message.setData(blog.getTitle());
 			messageService.save(message);
 			String likeNumKey = MESSAGE_LIKE_NUM_KEY + blog.getUserId();
 			Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);

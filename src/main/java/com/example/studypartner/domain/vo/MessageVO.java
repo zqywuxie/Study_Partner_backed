@@ -48,4 +48,8 @@ public class MessageVO extends Message {
 	 */
 	@ApiModelProperty(value = "评论")
 	private CommentsVO comment;
+
+
+	@ApiModelProperty(value = "好友申请")
+	private FriendsRecordVO friendsRecordVO;
 }

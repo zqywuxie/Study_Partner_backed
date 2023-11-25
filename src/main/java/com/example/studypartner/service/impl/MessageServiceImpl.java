@@ -60,7 +60,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 	@Override
 	public Long getMessageNum(Long userId, Integer type) {
 		LambdaQueryWrapper<Message> messageLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		messageLambdaQueryWrapper.eq(Message::getToId, userId).eq(Message::getIsRead, 0);
+		messageLambdaQueryWrapper.eq(Message::getToId, userId).eq(Message::getIsRead, 0).eq(Message::getType, type);
 		return this.count(messageLambdaQueryWrapper);
 	}
 
@@ -95,6 +95,15 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 			UserVO userVO = new UserVO();
 			BeanUtils.copyProperties(user, userVO);
 			messageVO.setFromUser(userVO);
+			// 评论 点赞 关注 好友申请
+
+			//fromUser 评论内容 博文封面
+
+			//fromUser 点赞内容（博文标题/评论）
+
+			//fromUser
+
+			//fromUser 申请内容
 			if (item.getType() == MessageTypeEnum.BLOG_COMMENT_LIKE.getValue()) {
 				CommentsVO commentsVO = blogCommentsService.getComment(Long.parseLong(item.getData()), userId);
 				messageVO.setComment(commentsVO);
@@ -103,11 +112,15 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 				BlogVO blogVO = blogService.getBlogById(Long.parseLong(item.getData()), userId);
 				messageVO.setBlog(blogVO);
 			}
-			if (item.getType() == MessageTypeEnum.FRIEND_APPLICATION.getValue()) {
+			if (item.getType() == MessageTypeEnum.COMMENT_ADD.getValue()) {
 				BlogVO blogVO = blogService.getBlogById(Long.parseLong(item.getData()), userId);
 				messageVO.setBlog(blogVO);
 			}
 			if (item.getType() == MessageTypeEnum.FRIEND_APPLICATION.getValue()) {
+				BlogVO blogVO = blogService.getBlogById(Long.parseLong(item.getData()), userId);
+				messageVO.setBlog(blogVO);
+			}
+			if (item.getType() == MessageTypeEnum.FOLLOW_NOTIFICATIONS.getValue()) {
 				BlogVO blogVO = blogService.getBlogById(Long.parseLong(item.getData()), userId);
 				messageVO.setBlog(blogVO);
 			}
@@ -115,27 +128,27 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 		}).collect(Collectors.toList());
 	}
 
-	@Override
-	public List<BlogVO> getUserBlog(Long userId) {
-		String key = BLOG_FEED_KEY + userId;
-		Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
-				.reverseRangeByScoreWithScores(key, 0, System.currentTimeMillis(), 0, 10);
-		if (typedTuples == null || typedTuples.size() == 0) {
-			return new ArrayList<>();
-		}
-		ArrayList<BlogVO> blogVOList = new ArrayList<>(typedTuples.size());
-		for (ZSetOperations.TypedTuple<String> tuple : typedTuples) {
-			long blogId = Long.parseLong(Objects.requireNonNull(tuple.getValue()));
-			BlogVO blogVO = blogService.getBlogById(blogId, userId);
-			blogVOList.add(blogVO);
-		}
-		String likeNumKey = MESSAGE_BLOG_NUM_KEY + userId;
-		Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);
-		if (Boolean.TRUE.equals(hasKey)) {
-			stringRedisTemplate.opsForValue().set(likeNumKey, "0");
-		}
-		return blogVOList;
-	}
+//	@Override
+//	public List<BlogVO> getUserBlog(Long userId) {
+//		String key = BLOG_FEED_KEY + userId;
+//		Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
+//				.reverseRangeByScoreWithScores(key, 0, System.currentTimeMillis(), 0, 10);
+//		if (typedTuples == null || typedTuples.size() == 0) {
+//			return new ArrayList<>();
+//		}
+//		ArrayList<BlogVO> blogVOList = new ArrayList<>(typedTuples.size());
+//		for (ZSetOperations.TypedTuple<String> tuple : typedTuples) {
+//			long blogId = Long.parseLong(Objects.requireNonNull(tuple.getValue()));
+//			BlogVO blogVO = blogService.getBlogById(blogId, userId);
+//			blogVOList.add(blogVO);
+//		}
+//		String likeNumKey = MESSAGE_BLOG_NUM_KEY + userId;
+//		Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);
+//		if (Boolean.TRUE.equals(hasKey)) {
+//			stringRedisTemplate.opsForValue().set(likeNumKey, "0");
+//		}
+//		return blogVOList;
+//	}
 
 }
 
