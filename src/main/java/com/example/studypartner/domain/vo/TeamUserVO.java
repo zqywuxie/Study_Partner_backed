@@ -1,6 +1,5 @@
 package com.example.studypartner.domain.vo;
 
-import com.example.studypartner.domain.vo.UserVO;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -32,10 +31,10 @@ public class TeamUserVO implements Serializable {
      */
     private String description;
 
-    /**
-     * 公告
-     */
-    private String announce;
+//    /**
+//     * 公告
+//     */
+//    private String announce;
 
     /**
      * 头像
@@ -56,7 +55,7 @@ public class TeamUserVO implements Serializable {
     /**
      * 创建人
      */
-    private UserVO createUser;
+    private List<UserVO> manageUserList;
     /**
      * 创建人
      */

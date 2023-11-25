@@ -1,8 +1,8 @@
 package com.example.studypartner.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.studypartner.domain.Team;
-import com.example.studypartner.domain.User;
+import com.example.studypartner.domain.entity.Team;
+import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.dto.TeamDTO;
 import com.example.studypartner.domain.request.TeamJoinRequest;
 import com.example.studypartner.domain.request.TeamQuitRequest;

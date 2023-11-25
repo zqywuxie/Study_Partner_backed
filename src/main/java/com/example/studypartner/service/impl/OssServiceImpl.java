@@ -39,6 +39,8 @@ public class OssServiceImpl implements OssService {
 
             //获取文件名称
             String fileName = file.getOriginalFilename();
+
+			//"http://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/11/22/0111d25ff9518711013fdcc7e82230.webp"
             //添加随机值
             String uuid = UUID.randomUUID().toString().replaceAll("-", "");
             //todo filename
@@ -63,7 +65,7 @@ public class OssServiceImpl implements OssService {
             //把上传后文件路径返回
             //需要把上传到阿里云oss路径手动拼接出来
             //https://achang-edu.oss-cn-hangzhou.aliyuncs.com/default.gif
-            String url = "http://" + bucketName + "." + endpoint + "/" + fileName;
+            String url = "https://" + bucketName + "." + endpoint + "/" + fileName;
 
             return url;
         } catch (IOException e) {

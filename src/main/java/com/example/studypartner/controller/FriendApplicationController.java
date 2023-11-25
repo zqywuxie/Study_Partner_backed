@@ -1,0 +1,229 @@
+package com.example.studypartner.controller;
+
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.studypartner.common.CommonResult;
+import com.example.studypartner.common.ErrorCode;
+import com.example.studypartner.domain.entity.FriendApplication;
+import com.example.studypartner.domain.entity.User;
+import com.example.studypartner.domain.request.FriendAddRequest;
+import com.example.studypartner.domain.vo.FriendsRecordVO;
+import com.example.studypartner.exception.ResultException;
+import com.example.studypartner.service.FriendApplicationService;
+import com.example.studypartner.service.UserService;
+import com.example.studypartner.utils.ResultUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * 好友控制器
+ *
+ * @author wuxie
+ * @date 2023/06/19
+ */
+@RestController
+@RequestMapping("/friends")
+@Api(tags = "好友管理模块")
+public class FriendApplicationController {
+	/**
+	 * 好友服务
+	 */
+	@Resource
+	private FriendApplicationService friendApplicationService;
+
+	/**
+	 * 用户服务
+	 */
+	@Resource
+	private UserService userService;
+
+	/**
+	 * 添加好友
+	 *
+	 * @param friendAddRequest 好友添加请求
+	 * @param request          请求
+	 * @return {@link CommonResult}<{@link Boolean}>
+	 */
+	@PostMapping("/add")
+	@ApiOperation(value = "添加好友")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "friendAddRequest", value = "好友添加请求"),
+					@ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<Boolean> addFriendRecords(@RequestBody FriendAddRequest friendAddRequest, HttpServletRequest request) {
+		if (friendAddRequest == null) {
+			throw new ResultException(ErrorCode.PARAMS_ERROR, "请求有误");
+		}
+		User loginUser = userService.getLoginUser(request);
+		boolean addStatus = friendApplicationService.addFriendRecords(loginUser, friendAddRequest);
+		return ResultUtils.success(addStatus);
+	}
+
+
+	/**
+	 * 删除好友
+	 *
+	 * @param friendId 删除好友
+	 * @param request          请求
+	 * @return {@link CommonResult}<{@link Boolean}>
+	 */
+	@PostMapping("/delete")
+	@ApiOperation(value = "添加好友")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "friendAddRequest", value = "好友添加请求"),
+					@ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<Boolean> deleteFriendRecords(@RequestParam Long friendId, HttpServletRequest request) {
+		if (friendId == null) {
+			throw new ResultException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+		}
+		User loginUser = userService.getLoginUser(request);
+		boolean addStatus = friendApplicationService.deleteFriendRecords(loginUser, friendId);
+		return ResultUtils.success(addStatus);
+	}
+
+
+	/**
+	 * 查询记录
+	 *
+	 * @param request 请求
+	 * @return {@link CommonResult}<{@link List}<{@link FriendsRecordVO}>>
+	 */
+	@GetMapping("/getRecords")
+	@ApiOperation(value = "查询记录")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<List<FriendsRecordVO>> getRecords(HttpServletRequest request) {
+		User loginUser = userService.getLoginUser(request);
+		if (loginUser == null) {
+			throw new ResultException(ErrorCode.NOT_LOGIN);
+		}
+		List<FriendsRecordVO> recordVOS = friendApplicationService.obtainFriendApplicationRecords(loginUser);
+		return ResultUtils.success(recordVOS);
+	}
+
+	/**
+	 * 获取未读记录条数
+	 *
+	 * @param request 请求
+	 * @return {@link CommonResult}<{@link Integer}>
+	 */
+	@GetMapping("/getUnreadCount")
+	@ApiOperation(value = "查询记录")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<Integer> getRecordCount(HttpServletRequest request) {
+		User loginUser = userService.getLoginUser(request);
+		int recordCount = friendApplicationService.obtainTheNumberOfUnreadRecords(loginUser);
+		return ResultUtils.success(recordCount);
+	}
+
+	/**
+	 * 获取我申请的记录
+	 *
+	 * @param request 请求
+	 * @return {@link CommonResult}<{@link List}<{@link FriendsRecordVO}>>
+	 */
+	@GetMapping("/getMyRecords")
+	@ApiOperation(value = "获取我申请的记录")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<List<FriendsRecordVO>> getMyRecords(HttpServletRequest request) {
+		User loginUser = userService.getLoginUser(request);
+		List<FriendsRecordVO> myFriendApplicationList = friendApplicationService.obtainTheRecordOfMyApplication(loginUser);
+		return ResultUtils.success(myFriendApplicationList);
+	}
+
+	/**
+	 * 按状态搜索好友列表
+	 *
+	 * @param request 请求
+	 * @return {@link CommonResult}<{@link List}<{@link User}>>
+	 */
+	@GetMapping("/my/list")
+	@ApiOperation(value = "通过用户名搜索用户")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<List<User>> searchUsersByUserName(HttpServletRequest request) {
+		User loginUser = userService.getLoginUser(request);
+		if (loginUser == null) {
+			throw new ResultException(ErrorCode.NOT_LOGIN);
+		}
+		Long loginUserId = loginUser.getId();
+		List<FriendApplication> friendApplications = friendApplicationService.list(new QueryWrapper<FriendApplication>()
+				.eq("receiveId", loginUserId)
+				.eq("status", 1));
+		// 使用流和Lambda表达式进行过滤查询
+		List<User> userList = friendApplications.stream().map(friendApplication -> userService.getById(friendApplication.getFromId())).collect(Collectors.toList());
+
+		return ResultUtils.success(userList);
+	}
+
+	/**
+	 * 同意申请
+	 *
+	 * @param fromId  从id
+	 * @param request 请求
+	 * @return {@link CommonResult}<{@link Boolean}>
+	 */
+	@PostMapping("/agree/{fromId}")
+	@ApiOperation(value = "同意申请")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "fromId", value = "申请id"),
+					@ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<Boolean> agreeToApply(@PathVariable("fromId") Long fromId, HttpServletRequest request) {
+		User loginUser = userService.getLoginUser(request);
+		boolean agreeToApplyStatus = friendApplicationService.agreeToApply(loginUser, fromId);
+		return ResultUtils.success(agreeToApplyStatus);
+	}
+
+	/**
+	 * 取消申请
+	 *
+	 * @param id      id
+	 * @param request 请求
+	 * @return {@link CommonResult}<{@link Boolean}>
+	 */
+	@PostMapping("/canceledApply/{id}")
+	@ApiOperation(value = "取消申请")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "id", value = "申请id"),
+					@ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<Boolean> canceledApply(@PathVariable("id") Long id, HttpServletRequest request) {
+		if (id == null) {
+			throw new ResultException(ErrorCode.PARAMS_ERROR, "请求有误");
+		}
+		User loginUser = userService.getLoginUser(request);
+		boolean canceledApplyStatus = friendApplicationService.canceledApply(id, loginUser);
+		return ResultUtils.success(canceledApplyStatus);
+	}
+
+	/**
+	 * 阅读
+	 *
+	 * @param ids     id
+	 * @param request 请求
+	 * @return {@link CommonResult}<{@link Boolean}>
+	 */
+	@GetMapping("/read")
+	@ApiOperation(value = "阅读")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "ids", value = "申请id"),
+					@ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<Boolean> toRead(@RequestParam(required = false) Set<Long> ids, HttpServletRequest request) {
+		if (CollectionUtils.isEmpty(ids)) {
+			return ResultUtils.success(false);
+		}
+		User loginUser = userService.getLoginUser(request);
+		boolean isRead = friendApplicationService.toRead(loginUser, ids);
+		return ResultUtils.success(isRead);
+	}
+}

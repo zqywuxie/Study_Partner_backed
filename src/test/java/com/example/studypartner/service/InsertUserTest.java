@@ -1,6 +1,6 @@
 package com.example.studypartner.service;
 
-import com.example.studypartner.domain.User;
+import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

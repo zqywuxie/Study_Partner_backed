@@ -1,5 +1,6 @@
 package com.example.studypartner.domain.vo;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -10,71 +11,75 @@ import java.util.Date;
  */
 @Data
 public class UserVO implements Serializable {
-    
-    /**
-     * id
-     */
-    private long id;
 
-    /**
-     * 用户昵称
-     */
-    private String username;
+	/**
+	 * id
+	 */
+	private Long id;
 
-    /**
-     * 账号
-     */
-    private String userAccount;
+	/**
+	 * 用户昵称
+	 */
+	private String username;
 
-    /**
-     * 用户头像
-     */
-    private String avatarUrl;
+	/**
+	 * 账号
+	 */
+	private String userAccount;
 
-    /**
-     * 性别
-     */
-    private Integer gender;
+	/**
+	 * 用户头像
+	 */
+	private String avatarUrl;
 
-    /**
-     * 电话
-     */
-    private String phone;
+	private String profile;
 
-    /**
-     * 邮箱
-     */
-    private String email;
+	/**
+	 * 性别
+	 */
+	private Integer gender;
 
-    /**
-     * 标签列表 json
-     */
-    private String tags;
+	/**
+	 * 电话
+	 */
+	private String phone;
 
-    /**
-     * 状态 0 - 正常
-     */
-    private Integer userStatus;
+	/**
+	 * 邮箱
+	 */
+	private String email;
 
-    /**
-     * 创建时间
-     */
-    private Date createTime;
+	/**
+	 * 标签列表 json
+	 */
+	private String tags;
 
-    /**
-     * 
-     */
-    private Date updateTime;
+	/**
+	 * 状态 0 - 正常
+	 */
+	private Integer userStatus;
 
-    /**
-     * 用户角色 0 - 普通用户 1 - 管理员
-     */
-    private Integer userRole;
+	/**
+	 * 创建时间
+	 */
+	private Date createTime;
 
-    /**
-     * 星球编号
-     */
-    private String planetCode;
+	/**
+	 *
+	 */
+	private Date updateTime;
 
-    private static final long serialVersionUID = -2643066616918515217L;
+	/**
+	 * 用户角色 0 - 普通用户 1 - 管理员
+	 */
+	private Integer userRole;
+
+
+	/**
+	 * 是否关注
+	 */
+	@ApiModelProperty(value = "是否关注")
+	private Boolean isFollow;
+
+	private static final long serialVersionUID = -2643066616918515217L;
 }

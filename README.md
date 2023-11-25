@@ -1,5 +1,8 @@
 # 志同道合（伙伴匹配系统）
 
+<img alt="Maven" src="https://raster.shields.io/badge/Maven-3.8.1-red.svg"/>
+<img alt="#" src="https://img.shields.io/github/stars/zqywuxie/Study_Partner_fronted?style=social&label=Stars"/>
+
 > 为大学生组队、交友等社交场景提供便利匹配的系统
 >
 > 该系统为H5移动端，Java + Vue 全栈项目
@@ -7,10 +10,12 @@
 > 前端代码:[zqywuxie/Study_Partner_fronted: 志同道合(伙伴匹配系统前端代码) (github.com)](https://github.com/zqywuxie/Study_Partner_fronted)
 >
 > 后端代码:[zqywuxie/Study_Partner_backed: 志同道合(伙伴匹配系统后端代码) (github.com)](https://github.com/zqywuxie/Study_Partner_backed)
+>
+> 测试账号：12345678 12345678
 
 ## 项目介绍
 
-该系统为大学生提供一个方便的交友平台，用户可以设置自己的标签来快速的匹配与自己相符的伙伴，并且可以创建队伍来进行组队打比赛等。极大的减小了找寻合适的伙伴成本。
+该系统为**大学生**提供一个方便的交友平台，用户可以设置自己的标签来快速的匹配与自己相符的伙伴，并且可以创建队伍来进行组队打比赛等。极大的减小了找寻合适的伙伴成本。
 
 
 
@@ -81,6 +86,7 @@ vite
   - 搜索页：根据标签进行搜索
   - 个人页：个人信息的修改
   - 管理员：队伍管理（包括私密队伍）
+  - 用户在线聊天
 
 
 
@@ -122,7 +128,37 @@ aliyun:
     database: 1
 ```
 
+- server配置
 
+```yaml
+# 统一前缀 /api
+server:
+  servlet:
+    context-path: /api
+    # 定义cookie的域
+    session:
+      cookie:
+        domain: localhost
+        secure: true
+```
+
+
+
+## 软硬件资源
+
+- JDK
+- IDEA
+- tomcat
+- nodejs，npm
+- 浏览器
+- 数据库（MySQL），缓存服务器（redis）
+
+发布需要购买
+
+新人
+- 阿里云服务器 （购买 100/年） 
+- 阿里云OSS存储
+- 域名 （9/年）
 
 ## 部署
 
@@ -207,3 +243,11 @@ location @router {
 已加队伍
 
 ![image-20230530210716063](https://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/05/19/image-20230530210716063.png)
+
+## bug
+
+1. 查看加入队伍信息空白
+2. 自己创建的队伍没有在加入队伍中
+3. 我创建的队伍 里面有我加入的队伍
+4. /team/detail 不见了
+   1. /team/get

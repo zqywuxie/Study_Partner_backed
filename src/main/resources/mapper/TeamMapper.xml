@@ -4,18 +4,19 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.studypartner.mapper.TeamMapper">
 
-    <resultMap id="BaseResultMap" type="com.example.studypartner.domain.Team">
-            <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="name" column="name" jdbcType="VARCHAR"/>
-            <result property="description" column="description" jdbcType="VARCHAR"/>
-            <result property="maxNum" column="maxNum" jdbcType="INTEGER"/>
-            <result property="expireTime" column="expireTime" jdbcType="TIMESTAMP"/>
-            <result property="userId" column="userId" jdbcType="BIGINT"/>
-            <result property="status" column="status" jdbcType="INTEGER"/>
-            <result property="password" column="password" jdbcType="VARCHAR"/>
-            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+    <resultMap id="BaseResultMap" type="com.example.studypartner.domain.entity.Team">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="avatarUrl" column="avatarUrl" jdbcType="VARCHAR"/>
+        <result property="description" column="description" jdbcType="VARCHAR"/>
+        <result property="maxNum" column="maxNum" jdbcType="INTEGER"/>
+        <result property="expireTime" column="expireTime" jdbcType="TIMESTAMP"/>
+        <result property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+        <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+        <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">

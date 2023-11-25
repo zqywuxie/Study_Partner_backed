@@ -1,8 +1,9 @@
 package com.example.studypartner.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.example.studypartner.common.CommonResult;
-import com.example.studypartner.domain.User;
+import com.example.studypartner.domain.entity.User;
+import com.example.studypartner.domain.request.RegisterRequest;
+import com.example.studypartner.domain.vo.UserVO;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -13,67 +14,80 @@ import java.util.List;
  * @createDate 2022-10-10 16:54:41
  */
 public interface UserService extends IService<User> {
-    /**
-     * @param usercount     账号
-     * @param password      账号密码
-     * @param checkPassword 校验密码
-     * @return 返回用户id
-     */
-    Long Register(String usercount, String password, String checkPassword, String avatarUrl, String userName);
+	/**
+	 * @param userAccount     账号
+	 * @param password      账号密码
+	 * @param checkPassword 校验密码
+	 * @return 返回用户id
+	 */
+	String register(RegisterRequest request);
 
-    /**
-     * @param userAccount
-     * @param userPassword
-     * @param request
-     * @return
-     */
-    User Login(String userAccount, String userPassword, HttpServletRequest request);
+	/**
+	 * 登录
+	 * @param userAccount
+	 * @param userPassword
+	 * @param request
+	 * @return
+	 */
+	User login(String userAccount, String userPassword, HttpServletRequest request);
+
+	/**
+	 * 根据邮箱登录
+	 * @param email
+	 * @param request
+	 * @return
+	 */
+	User loginByEmail(String email, HttpServletRequest request);
 
 
-    /**
-     * 用户信息脱敏
-     *
-     * @param user
-     * @return
-     */
-    User cleanUser(User user);
+	/**
+	 * 用户信息脱敏
+	 *
+	 * @param user
+	 * @return
+	 */
+	User cleanUser(User user);
 
 
-    /**
-     * 根据标签名进行查找用户
-     *
-     * @param tagNameList
-     * @return
-     */
-    List<User> searchUserByTags(List<String> tagNameList);
+	/**
+	 * 根据标签名进行查找用户
+	 *
+	 * @param tagNameList
+	 * @return
+	 */
+	List<User> searchUserByTags(List<String> tagNameList);
 
-    List<User> memorySearch(List<String> tagNameList);
+	UserVO searchUserById(Long id, User loginUser);
 
-    /**
-     * 更新数据
-     *
-     * @param user
-     * @param loginUser
-     * @return
-     */
-    Integer updateUser(User user, User loginUser);
+	List<User> memorySearch(List<String> tagNameList);
 
-    /**
-     * 获得当前用户信息
-     *
-     * @return
-     */
-    User getLoginUser(HttpServletRequest request);
+	/**
+	 * 更新数据
+	 *
+	 * @param user
+	 * @param request
+	 * @return
+	 */
+	Integer updateUser(User user, HttpServletRequest request);
 
-    /**
-     * 鉴权
-     *
-     * @param request
-     * @return
-     */
-    boolean isAdmin(HttpServletRequest request);
+	/**
+	 * 获得当前用户信息
+	 *
+	 * @return
+	 */
+	User getLoginUser(HttpServletRequest request);
 
-    boolean isAdmin(User loginUser);
+	/**
+	 * 鉴权
+	 *
+	 * @param request
+	 * @return
+	 */
+	boolean isAdmin(HttpServletRequest request);
 
-    List<User> matchUsers(long num, User loginUser);
+	boolean isAdmin(User loginUser);
+
+	List<User> matchUsers(long num, User loginUser);
+
+	void updatePassword(String phone, String password);
 }

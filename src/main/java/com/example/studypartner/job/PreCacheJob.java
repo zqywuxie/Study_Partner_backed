@@ -3,7 +3,7 @@ package com.example.studypartner.job;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.studypartner.domain.User;
+import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -17,6 +17,8 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static com.example.studypartner.constant.RedissonContents.PRECACHE_JOB_KEY;
 
 @Component
 @Slf4j
@@ -37,7 +39,7 @@ public class PreCacheJob {
 
     @Scheduled(cron = "0 0 0 * * * ")
     public void doCacheRecommendUser() {
-        RLock lock = redissonClient.getLock("wuxie:precachejob:docache:lock");
+        RLock lock = redissonClient.getLock(PRECACHE_JOB_KEY);
         try {
             //-1 默认值表示不会过期
             if (lock.tryLock(0, -1, TimeUnit.SECONDS)) {

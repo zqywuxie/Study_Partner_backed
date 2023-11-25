@@ -1,6 +1,6 @@
 package com.example.studypartner.mapper;
 
-import com.example.studypartner.domain.User;
+import com.example.studypartner.domain.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 

@@ -4,12 +4,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.studypartner.mapper.UserMapper">
 
-    <resultMap id="BaseResultMap" type="com.example.studypartner.domain.User">
+    <resultMap id="BaseResultMap" type="com.example.studypartner.domain.entity.User">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="username" column="username" jdbcType="VARCHAR"/>
             <result property="userAccount" column="userAccount" jdbcType="VARCHAR"/>
             <result property="avatarUrl" column="avatarUrl" jdbcType="VARCHAR"/>
             <result property="gender" column="gender" jdbcType="VARCHAR"/>
+            <result property="friendsIds" column="friendsIds" jdbcType="VARCHAR"/>
             <result property="userPassword" column="userPassword" jdbcType="VARCHAR"/>
             <result property="email" column="email" jdbcType="VARCHAR"/>
             <result property="userStatus" column="userStatus" jdbcType="INTEGER"/>

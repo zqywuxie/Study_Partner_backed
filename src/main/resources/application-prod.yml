@@ -1,10 +1,10 @@
 spring:
   application:
-    name: user-center
+    name: StudyPartnerBacked
   datasource:
     username: root
     password: wszqy123.
-    url: jdbc:mysql://localhost:3306/usercenter?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/study?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     # 配置session的存储方式
   session:
@@ -31,6 +31,8 @@ server:
     session:
       cookie:
         domain: zqywuku.top
+        secure: true
+  port: 10091
 
 aliyun:
   oss:
@@ -38,4 +40,4 @@ aliyun:
       endpoint: xx
       keyid: xx
       keysecret: xx
-      bucketname: xx
+      bucketname: xxx

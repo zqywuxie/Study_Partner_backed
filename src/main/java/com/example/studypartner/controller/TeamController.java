@@ -5,9 +5,9 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.common.ErrorCode;
-import com.example.studypartner.domain.Team;
-import com.example.studypartner.domain.User;
-import com.example.studypartner.domain.UserTeam;
+import com.example.studypartner.domain.entity.Team;
+import com.example.studypartner.domain.entity.User;
+import com.example.studypartner.domain.entity.UserTeam;
 import com.example.studypartner.domain.dto.TeamDTO;
 import com.example.studypartner.domain.request.*;
 import com.example.studypartner.domain.vo.TeamUserVO;
@@ -23,10 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -57,12 +54,11 @@ public class TeamController {
      */
 
     @GetMapping("/get")
-    public CommonResult<TeamUserVO> searchOne(Long id, HttpServletRequest request) {
+    public CommonResult<TeamUserVO> searchTeamByID(Long id, HttpServletRequest request) {
         if (id <= 0) {
             throw new ResultException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
-
         TeamUserVO teamUserVo = teamService.getTeamById(id, true, loginUser);
 
         if (teamUserVo == null) {
@@ -84,7 +80,7 @@ public class TeamController {
             throw new ResultException(ErrorCode.PARAMS_ERROR, "数据为空");
         }
         User loginUser = userService.getLoginUser(request);
-        teamDTO.setUserId(loginUser.getId());
+//        teamDTO.setUserId(loginUser.getId());
         List<TeamUserVO> teams = teamService.listTeams(teamDTO, true);
         queryTeamCount(request, teams);
         return ResultUtils.success(teams);
@@ -122,15 +118,18 @@ public class TeamController {
             throw new ResultException(ErrorCode.PARAMS_ERROR, "数据为空");
         }
         User loginUser = userService.getLoginUser(request);
+        Long loginUserId = loginUser.getId();
         QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-        userTeamQueryWrapper.eq("userId", loginUser.getId());
+        userTeamQueryWrapper.eq("userId", loginUser);
         List<UserTeam> list = userTeamService.list(userTeamQueryWrapper);
         //去重 自己创建的用户
 //        Map<Long, List<UserTeam>> collect = list.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
 //        List<Long> idList = new ArrayList<>(collect.keySet());
         List<Long> idList = list.stream().map(UserTeam::getTeamId).collect(Collectors.toList());
-        teamDTO.setUserId(loginUser.getId());
-        teamDTO.setIdList(idList);
+//        teamDTO.setIdList(Collections.singletonList(loginUser.getId()));
+//        teamDTO.setUserId(loginUser.getId());
+
+        teamDTO.setJoinId(loginUserId);
         List<TeamUserVO> teamUserVOS = teamService.listTeams(teamDTO, true);
         queryTeamCount(request, teamUserVOS);
         return ResultUtils.success(teamUserVOS);
@@ -164,6 +163,8 @@ public class TeamController {
      */
 
 
+
+	//todo 添加失败
     @PostMapping("/add")
     public CommonResult<Long> add(@RequestBody TeamAddRequest teamAddRequest, HttpServletRequest request) {
         if (teamAddRequest == null) {

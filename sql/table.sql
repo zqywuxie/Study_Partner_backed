@@ -72,3 +72,63 @@ create table user_team
 )
     comment '用户队伍关系';
 
+
+-- ----------------------------
+-- 博客表
+-- ----------------------------
+DROP TABLE IF EXISTS `blog`;
+CREATE TABLE `blog`
+(
+    `id`           bigint(20) UNSIGNED                                            NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id`      bigint(20) UNSIGNED                                            NOT NULL COMMENT '用户id',
+    `title`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '标题',
+    `images`       varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL     DEFAULT NULL COMMENT '图片，最多9张，多张以\",\"隔开',
+    `content`      varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章',
+    `liked_num`    int(8) UNSIGNED                                                NULL     DEFAULT 0 COMMENT '点赞数量',
+    `comments_num` int(8) UNSIGNED                                                NULL     DEFAULT 0 COMMENT '评论数量',
+    `create_time`  timestamp                                                      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  timestamp                                                      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 19
+  CHARACTER SET = utf8mb4
+  COLLATE = utf8mb4_general_ci
+  ROW_FORMAT = COMPACT;
+
+
+-- ----------------------------
+-- 用户关注表
+-- ----------------------------
+DROP TABLE IF EXISTS `follow`;
+CREATE TABLE `follow`
+(
+    `id`             bigint(20)          NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id`        bigint(20) UNSIGNED NOT NULL COMMENT '用户id',
+    `follow_user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关注的用户id',
+    `create_time`    timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`    timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_delete`      tinyint(4)          NULL     DEFAULT 0 COMMENT '逻辑删除',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 44
+  CHARACTER SET = utf8
+  COLLATE = utf8_general_ci
+  ROW_FORMAT = COMPACT;
+
+
+DROP TABLE IF EXISTS `blogLike`;
+CREATE TABLE `blogLike`
+(
+    `id`          bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `blog_id`     bigint(20) NOT NULL COMMENT '博文id',
+    `user_id`     bigint(20) NOT NULL COMMENT '用户id',
+    `create_time` datetime   NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` datetime   NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `is_delete`   tinyint(4) NULL DEFAULT 0 COMMENT '逻辑删除',
+    PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB
+  AUTO_INCREMENT = 4
+  CHARACTER SET = utf8
+  COLLATE = utf8_general_ci
+  ROW_FORMAT = COMPACT;
+
