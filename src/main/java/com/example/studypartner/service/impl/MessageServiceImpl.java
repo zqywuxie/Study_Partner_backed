@@ -4,19 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.studypartner.common.ErrorCode;
+import com.example.studypartner.domain.entity.FriendApplication;
 import com.example.studypartner.domain.entity.Message;
 import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.enums.MessageTypeEnum;
-import com.example.studypartner.domain.vo.BlogVO;
-import com.example.studypartner.domain.vo.CommentsVO;
-import com.example.studypartner.domain.vo.MessageVO;
-import com.example.studypartner.domain.vo.UserVO;
+import com.example.studypartner.domain.vo.*;
 import com.example.studypartner.exception.ResultException;
 import com.example.studypartner.mapper.MessageMapper;
-import com.example.studypartner.service.BlogService;
-import com.example.studypartner.service.CommentsService;
-import com.example.studypartner.service.MessageService;
-import com.example.studypartner.service.UserService;
+import com.example.studypartner.service.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -55,6 +50,12 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 	private UserService userService;
 
 	@Resource
+	private FriendApplicationService friendApplicationService;
+
+	@Resource
+	private FollowService followService;
+
+	@Resource
 	private StringRedisTemplate stringRedisTemplate;
 
 	@Override
@@ -67,7 +68,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 	@Override
 	public List<MessageVO> getMessages(Long userId, Integer type) {
 		LambdaQueryWrapper<Message> messageLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		messageLambdaQueryWrapper.eq(Message::getToId, userId).eq(Message::getIsRead, 0)
+		messageLambdaQueryWrapper.eq(Message::getToId, userId)
 				.and(wp -> wp.eq(Message::getType, type))
 				.orderBy(true, false, Message::getCreateTime);
 		List<Message> messageList = this.list(messageLambdaQueryWrapper);
@@ -77,18 +78,18 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 		}
 
 		// 已读
-		LambdaUpdateWrapper<Message> messageLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
-		messageLambdaUpdateWrapper.eq(Message::getToId, userId).eq(Message::getType, type).set(Message::getIsRead, 1);
-		this.update(messageLambdaUpdateWrapper);
-		String likeNumKey = MESSAGE_LIKE_NUM_KEY + userId;
-		Boolean hasLike = stringRedisTemplate.hasKey(likeNumKey);
-		if (Boolean.TRUE.equals(hasLike)) {
-			stringRedisTemplate.opsForValue().set(likeNumKey, "0");
-		}
+//		LambdaUpdateWrapper<Message> messageLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
+//		messageLambdaUpdateWrapper.eq(Message::getToId, userId).eq(Message::getType, type).set(Message::getIsRead, 1);
+//		this.update(messageLambdaUpdateWrapper);
+//		String likeNumKey = MESSAGE_LIKE_NUM_KEY + userId;
+//		Boolean hasLike = stringRedisTemplate.hasKey(likeNumKey);
+//		if (Boolean.TRUE.equals(hasLike)) {
+//			stringRedisTemplate.opsForValue().set(likeNumKey, "0");
+//		}
+
 		return messageList.stream().map((item) -> {
 			MessageVO messageVO = new MessageVO();
-			BeanUtils.copyProperties(item, messageVO);
-			User user = userService.getById(messageVO.getFromId());
+			User user = userService.getById(item.getFromId());
 			if (user == null) {
 				throw new ResultException(ErrorCode.PARAMS_ERROR, "发送人不存在");
 			}
@@ -106,26 +107,44 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 			//fromUser 申请内容
 			if (item.getType() == MessageTypeEnum.BLOG_COMMENT_LIKE.getValue()) {
 				CommentsVO commentsVO = blogCommentsService.getComment(Long.parseLong(item.getData()), userId);
+				BlogVO blogVO = blogService.getBlogById(commentsVO.getBlogId());
 				messageVO.setComment(commentsVO);
+				messageVO.setBlog(blogVO);
 			}
 			if (item.getType() == MessageTypeEnum.BLOG_LIKE.getValue()) {
 				BlogVO blogVO = blogService.getBlogById(Long.parseLong(item.getData()), userId);
 				messageVO.setBlog(blogVO);
 			}
 			if (item.getType() == MessageTypeEnum.COMMENT_ADD.getValue()) {
-				BlogVO blogVO = blogService.getBlogById(Long.parseLong(item.getData()), userId);
+				CommentsVO commentsVO = blogCommentsService.getComment(Long.parseLong(item.getData()), item.getFromId());
+				BlogVO blogVO = blogService.getBlogById(commentsVO.getBlogId(), userId);
 				messageVO.setBlog(blogVO);
+				messageVO.setComment(commentsVO);
 			}
-			if (item.getType() == MessageTypeEnum.FRIEND_APPLICATION.getValue()) {
-				BlogVO blogVO = blogService.getBlogById(Long.parseLong(item.getData()), userId);
-				messageVO.setBlog(blogVO);
+			if (item.getType() == MessageTypeEnum.FRIEND_APPLICATION.getValue() || item.getType() == MessageTypeEnum.FOLLOW_NOTIFICATIONS.getValue()) {
+				User fromUser = userService.getById(item.getData());
+				UserVO uservo = new UserVO();
+				BeanUtils.copyProperties(fromUser, uservo);
+				LambdaQueryWrapper<FriendApplication> queryWrapper = new LambdaQueryWrapper<>();
+				queryWrapper.eq(FriendApplication::getFromId, item.getData()).eq(FriendApplication::getReceiveId, userId);
+				FriendApplication friendApplication = friendApplicationService.getOne(queryWrapper);
+				FriendsRecordVO friendsRecordVO = new FriendsRecordVO();
+				friendsRecordVO.setApplyUser(userVO);
+				friendsRecordVO.setRemark(friendApplication.getRemark());
+				friendsRecordVO.setStatus(friendApplication.getStatus());
+				messageVO.setFromUser(userVO);
+				messageVO.setFriendsRecordVO(friendsRecordVO);
 			}
-			if (item.getType() == MessageTypeEnum.FOLLOW_NOTIFICATIONS.getValue()) {
-				BlogVO blogVO = blogService.getBlogById(Long.parseLong(item.getData()), userId);
-				messageVO.setBlog(blogVO);
-			}
+
 			return messageVO;
 		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public Boolean readMessage(Long userId, Integer type) {
+		LambdaUpdateWrapper<Message> messageLambdaQueryWrapper = new LambdaUpdateWrapper<>();
+		messageLambdaQueryWrapper.eq(Message::getToId, userId).eq(Message::getType, type).set(Message::getIsRead, 1);
+		return this.update(messageLambdaQueryWrapper);
 	}
 
 //	@Override

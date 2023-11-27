@@ -1,4 +1,27 @@
 spring:
+  mail:
+    # 配置SMTP服务器地址
+    host: smtp.163.com
+    # 配置端口号465或者25
+    port: 465
+    # 发送者邮箱（根据自己邮箱填写）
+    username: xxx
+    #  配置密码，注意是开启POP3/SMTP的授权密码(根据自己的授权密码填写)
+    password: xxx
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          enable: true
+          ssl:
+            # 设为true时 端口号设为 465 设为false时 端口号设为25
+            enable: true
+          socketFactoryClass: javax.net.ssl.SSLSocketFactory
+        #表示开启 DEBUG 模式，这样，邮件发送过程的日志会在控制台打印出来，方便排查错误
+        debug: true
+    # 邮箱编码格式
+    default-encoding: UTF-8
   application:
     name: StudyPartnerBacked
   datasource:
@@ -34,10 +57,11 @@ server:
         secure: true
   port: 10091
 
+# 阿里云OSS配置，图片上传使用
 aliyun:
   oss:
     file:
-      endpoint: xx
-      keyid: xx
-      keysecret: xx
+      endpoint: xxx
+      keyid: xxx
+      keysecret: xxx
       bucketname: xxx

@@ -2,9 +2,7 @@ package com.example.studypartner.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.studypartner.domain.entity.Follow;
-import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.vo.UserVO;
-import io.swagger.models.auth.In;
 
 import java.util.List;
 
@@ -44,5 +42,5 @@ public interface FollowService extends IService<Follow> {
 	List<UserVO> listMyFollow(Long loginUser);
 
 	Integer fansCount(Long loginUser);
-	Integer myAttentionCount(Long loginUser);
+	Integer myFollowCount(Long loginUser);
 }

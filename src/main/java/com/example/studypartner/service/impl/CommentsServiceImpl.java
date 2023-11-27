@@ -74,7 +74,7 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 		message.setFromId(userId);
 		message.setToId(blog.getUserId());
 		//添加评论内容
-		message.setData(addCommentRequest.getContent());
+		message.setData(String.valueOf(comments.getId()));
 		messageService.save(message);
 		String likeNumKey = MESSAGE_COMMENT_NUM_KEY + blog.getUserId();
 		Boolean hasKey = redisTemplate.hasKey(likeNumKey);
@@ -114,13 +114,13 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 	@Override
 	public CommentsVO getComment(long commentId, Long userId) {
 		Comments comments = this.getById(commentId);
-		CommentsVO CommentsVO = new CommentsVO();
-		BeanUtils.copyProperties(comments, CommentsVO);
+		CommentsVO commentsVO = new CommentsVO();
+		BeanUtils.copyProperties(comments, commentsVO);
 		LambdaQueryWrapper<CommentLike> commentLikeLambdaQueryWrapper = new LambdaQueryWrapper<>();
 		commentLikeLambdaQueryWrapper.eq(CommentLike::getUserId, userId).eq(CommentLike::getCommentId, commentId);
 		long count = commentLikeService.count(commentLikeLambdaQueryWrapper);
-		CommentsVO.setIsLiked(count > 0);
-		return CommentsVO;
+		commentsVO.setIsLiked(count > 0);
+		return commentsVO;
 	}
 
 	@Override
@@ -164,7 +164,7 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 			message.setType(MessageTypeEnum.BLOG_COMMENT_LIKE.getValue());
 			message.setFromId(userId);
 			message.setToId(comments.getUserId());
-			message.setData(String.valueOf(comments.getContent()));
+			message.setData(String.valueOf(comments.getId()));
 			messageService.save(message);
 		} else {
 			commentLikeService.remove(commentLikeLambdaQueryWrapper);

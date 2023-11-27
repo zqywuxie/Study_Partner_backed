@@ -115,12 +115,16 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 			return blogVO;
 		}).collect(Collectors.toList());
 		for (BlogVO blogVO : blogVOList) {
+			User user = userService.getById(blogVO.getUserId());
+			UserVO userVO = new UserVO();
+			BeanUtils.copyProperties(user, userVO);
 			String images = blogVO.getImages();
 			if (images == null) {
 				continue;
 			}
 			String[] imgStr = images.split(",");
 			blogVO.setCoverImage(imgStr[0]);
+			blogVO.setAuthor(userVO);
 		}
 		blogVoPage.setRecords(blogVOList);
 		return blogVoPage;
@@ -159,7 +163,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 			message.setType(MessageTypeEnum.BLOG_LIKE.getValue());
 			message.setFromId(userId);
 			message.setToId(blog.getUserId());
-			message.setData(blog.getTitle());
+			message.setData(String.valueOf(blog.getId()));
 			messageService.save(message);
 			String likeNumKey = MESSAGE_LIKE_NUM_KEY + blog.getUserId();
 			Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);
@@ -208,6 +212,27 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 		}
 		blogVoPage.setRecords(blogVOList);
 		return blogVoPage;
+	}
+
+
+	@Override
+	public BlogVO getBlogById(long blogId) {
+		Blog blog = this.getById(blogId);
+		BlogVO blogVO = new BlogVO();
+		BeanUtils.copyProperties(blog, blogVO);
+		String images = blogVO.getImages();
+		if (images == null) {
+			return blogVO;
+		}
+		String[] imgStrs = images.split(",");
+		ArrayList<String> imgStrList = new ArrayList<>();
+		for (String imgStr : imgStrs) {
+			imgStrList.add(imgStr);
+		}
+		String imgStr = StringUtils.join(imgStrList, ",");
+		blogVO.setImages(imgStr);
+		blogVO.setCoverImage(imgStrList.get(0));
+		return blogVO;
 	}
 
 	@Override

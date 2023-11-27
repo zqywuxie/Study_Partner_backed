@@ -17,8 +17,6 @@ import java.io.Serializable;
 public class FriendsRecordVO implements Serializable {
 	private static final long serialVersionUID = 1928465648232335L;
 
-	@ApiModelProperty(value = "id")
-	private Long id;
 
 	/**
 	 * 申请状态 默认0 （0-未通过 1-已同意 2-已过期）

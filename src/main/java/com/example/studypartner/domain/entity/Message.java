@@ -11,6 +11,7 @@ import java.util.Date;
 
 /**
  * 
+ * @author wuxie
  * @TableName message
  */
 @TableName(value ="message")

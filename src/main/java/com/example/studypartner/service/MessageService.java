@@ -33,4 +33,6 @@ public interface MessageService extends IService<Message> {
 	 */
 	List<MessageVO> getMessages(Long userId, Integer type);
 
+	Boolean readMessage(Long userId,Integer type);
+
 }

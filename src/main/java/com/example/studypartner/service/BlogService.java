@@ -24,6 +24,7 @@ public interface BlogService extends IService<Blog> {
 	Page<BlogVO> pageBlog(long currentPage, Long id);
 
 	BlogVO getBlogById(long blogId, Long userId);
+	BlogVO getBlogById(long blogId);
 
 	void deleteBlog(Long blogId, Long userId, boolean isAdmin);
 

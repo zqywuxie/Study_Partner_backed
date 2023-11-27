@@ -113,21 +113,15 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 				} else {
 					newFriend.setRemark(remark);
 				}
-				newFriend.setCreateTime(new Date());
 
-				// todo 添加消息
-				Message message = new Message();
-				message.setType(MessageTypeEnum.FRIEND_APPLICATION.getValue());
-				message.setFromId(loginUserId);
-				message.setToId(receiveId);
-				message.setData(newFriend.getRemark());
-				messageService.save(message);
-				String likeNumKey = MESSAGE_COMMENT_NUM_KEY + receiveId;
-				Boolean hasKey = redisTemplate.hasKey(likeNumKey);
+
+
+				String friendApplication = MESSAGE_COMMENT_NUM_KEY + receiveId;
+				Boolean hasKey = redisTemplate.hasKey(friendApplication);
 				if (Boolean.TRUE.equals(hasKey)) {
-					redisTemplate.opsForValue().increment(likeNumKey);
+					redisTemplate.opsForValue().increment(friendApplication);
 				} else {
-					redisTemplate.opsForValue().set(likeNumKey, "1");
+					redisTemplate.opsForValue().set(friendApplication, "1");
 				}
 
 
@@ -137,6 +131,13 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 			log.error("add friend ：", e);
 			return false;
 		} finally {
+			// todo 添加消息
+			Message message = new Message();
+			message.setType(MessageTypeEnum.FRIEND_APPLICATION.getValue());
+			message.setFromId(loginUserId);
+			message.setToId(receiveId);
+			message.setData(String.valueOf(loginUser.getId()));
+			messageService.save(message);
 			// 只能释放自己的锁
 			if (lock.isHeldByCurrentThread()) {
 				System.out.println("unLock: " + Thread.currentThread().getId());

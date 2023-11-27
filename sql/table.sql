@@ -1,23 +1,151 @@
-create database usercenter;
-create table tag
+-- auto-generated definition
+drop table if exists blog;
+create table blog
 (
-    id         bigint auto_increment comment 'id'
+    id          bigint unsigned auto_increment comment '主键'
         primary key,
-    tagName    varchar(256)                       null comment '标签名称',
-    userId     bigint                             null comment '用户 id',
-    parentId   bigint                             null comment '父标签 id',
-    isParent   tinyint                            null comment '0 - 不是, 1 - 父标签',
-    createTime datetime default CURRENT_TIMESTAMP null comment '创建时间',
-    updateTime datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    isDelete   tinyint  default 0                 not null comment '是否删除',
-    constraint uniIdx_tagName
-        unique (tagName)
+    userId      bigint unsigned                          not null comment '用户id',
+    title       varchar(255) collate utf8mb4_unicode_ci  not null comment '标题',
+    images      varchar(2048)                            null comment '图片，最多9张，多张以","隔开',
+    content     varchar(2048) collate utf8mb4_unicode_ci not null comment '文章',
+    likedNum    int unsigned default '0'                 null comment '点赞数量',
+    commentsNum int unsigned default '0'                 null comment '评论数量',
+    createTime  timestamp    default CURRENT_TIMESTAMP   not null comment '创建时间',
+    updateTime  timestamp    default CURRENT_TIMESTAMP   not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete    tinyint      default 0                   not null
 )
-    comment '标签';
+    collate = utf8mb4_general_ci
+    row_format = COMPACT;
 
-create index idx_userId
-    on tag (userId);
+-- auto-generated definition
+drop table if exists blog_like;
+create table blog_like
+(
+    id         bigint auto_increment comment '主键'
+        primary key,
+    blogId     bigint                             not null comment '博文id',
+    userId     bigint                             not null comment '用户id',
+    createTime datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    updateTime datetime                           null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 null comment '逻辑删除'
+)
+    charset = utf8mb3
+    row_format = COMPACT;
 
+-- auto-generated definition
+drop table if exists chat;
+create table chat
+(
+    id         bigint auto_increment comment '聊天记录id'
+        primary key,
+    fromId     bigint                                  not null comment '发送消息id',
+    toId       bigint                                  null comment '接收消息id',
+    content    varchar(512) collate utf8mb4_unicode_ci null,
+    chatType   tinyint                                 not null comment '聊天类型 1-私聊 2-群聊',
+    createTime datetime default CURRENT_TIMESTAMP      null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP      null,
+    teamId     bigint                                  null comment '群聊id',
+    isDelete   tinyint  default 0                      null
+)
+    comment '聊天记录表' collate = utf8mb4_general_ci
+                         row_format = COMPACT;
+
+
+-- auto-generated definition
+drop table if exists comment_like;
+create table comment_like
+(
+    id         bigint auto_increment comment '主键'
+        primary key,
+    commentId  bigint                             not null comment '评论id',
+    userId     bigint                             not null comment '用户id',
+    createTime datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 null comment '逻辑删除'
+)
+    collate = utf8mb4_general_ci
+    row_format = COMPACT;
+
+-- auto-generated definition
+drop table if exists comments;
+create table comments
+(
+    id              int auto_increment
+        primary key,
+    blogId          bigint unsigned                     not null,
+    userId          bigint                              not null,
+    content         text                                not null,
+    likedNum        int       default 0                 null,
+    createTime      timestamp default CURRENT_TIMESTAMP null,
+    updateTime      timestamp default CURRENT_TIMESTAMP null,
+    status          tinyint unsigned                    null comment '状态，0：正常，1：被举报，2：禁止查看',
+    parentCommentId int                                 null,
+    childCommentId  int                                 null,
+    constraint comments_ibfk_1
+        foreign key (blogId) references blog (id),
+    constraint comments_ibfk_2
+        foreign key (userId) references user (id),
+    constraint comments_ibfk_3
+        foreign key (parentCommentId) references comments (id),
+    constraint comments_ibfk_4
+        foreign key (childCommentId) references comments (id)
+)
+    collate = utf8mb4_general_ci
+    row_format = COMPACT;
+
+-- auto-generated definition
+drop table if exists follow;
+create table follow
+(
+    id           bigint auto_increment comment '主键'
+        primary key,
+    userId       bigint unsigned                     not null comment '用户id',
+    followUserId bigint unsigned                     not null comment '关注的用户id',
+    createTime   timestamp default CURRENT_TIMESTAMP not null comment '创建时间',
+    updateTime   timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete     tinyint   default 0                 null comment '逻辑删除'
+)
+    charset = utf8mb3
+    row_format = COMPACT;
+
+-- auto-generated definition
+drop table if exists friend_application;
+create table friend_application
+(
+    id         bigint auto_increment comment '好友申请id'
+        primary key,
+    fromId     bigint                             not null comment '发送申请的用户id',
+    receiveId  bigint                             null comment '接收申请的用户id ',
+    isRead     tinyint  default 0                 not null comment '是否已读(0-未读 1-已读)',
+    status     tinyint  default 0                 not null comment '申请状态 默认0 （0-未通过 1-已同意 2-已过期 3-不同意）',
+    createTime datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP null,
+    isDelete   tinyint  default 0                 not null comment '是否删除',
+    remark     varchar(214)                       null comment '好友申请备注信息'
+)
+    comment '好友申请管理表' collate = utf8mb4_general_ci
+                             row_format = COMPACT;
+
+-- auto-generated definition
+drop table if exists message;
+create table message
+(
+    id         bigint auto_increment comment '主键'
+        primary key,
+    type       tinyint                            null comment '类型 点赞1/评论2/关注3/系统信息4',
+    fromId     bigint                             null comment '消息发送的用户id',
+    toId       bigint                             null comment '消息接收的用户id',
+    data       varchar(255)                       null comment '消息内容',
+    isRead     tinyint  default 0                 null comment '已读-0 未读 ,1 已读',
+    createTime datetime default CURRENT_TIMESTAMP null comment '创建时间',
+    updateTime datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP comment '更新时间',
+    isDelete   tinyint  default 0                 null comment '逻辑删除'
+)
+    collate = utf8mb4_general_ci
+    row_format = COMPACT;
+
+-- auto-generated definition
+drop table if exists team;
 create table team
 (
     id          bigint auto_increment comment 'id'
@@ -31,10 +159,25 @@ create table team
     password    varchar(512)                       null comment '密码',
     createTime  datetime default CURRENT_TIMESTAMP null comment '创建时间',
     updateTime  datetime default CURRENT_TIMESTAMP null on update CURRENT_TIMESTAMP,
-    isDelete    tinyint  default 0                 not null comment '是否删除'
+    isDelete    tinyint  default 0                 not null comment '是否删除',
+    avatarUrl   varchar(512)                       null comment '队伍头像'
 )
     comment '队伍';
 
+-- auto-generated definition
+drop table if exists message;
+create table user_message
+(
+    from_name   varchar(50)  null comment '发送人',
+    message     varchar(500) null comment '消息',
+    to_name     varchar(50)  null comment '接收人',
+    create_time datetime     null comment '日期'
+)
+    charset = utf8mb3
+    row_format = DYNAMIC;
+
+-- auto-generated definition
+drop table if exists user;
 create table user
 (
     id           bigint auto_increment
@@ -55,10 +198,13 @@ create table user
     city         varchar(512) charset utf8mb3       null comment '所在城市',
     profile      varchar(512) charset utf8mb3       null comment '市',
     province     varchar(512) charset utf8mb3       null comment '省',
-    tags         varchar(1024)                      null comment '标签 json 列表'
+    tags         varchar(1024)                      null comment '标签 json 列表',
+    friendsIds   varchar(512)                       null comment '好友id'
 )
     comment '用户表';
 
+-- auto-generated definition
+drop table if exists user_team;
 create table user_team
 (
     id         bigint auto_increment comment 'id'
@@ -71,64 +217,4 @@ create table user_team
     isDelete   tinyint  default 0                 not null comment '是否删除'
 )
     comment '用户队伍关系';
-
-
--- ----------------------------
--- 博客表
--- ----------------------------
-DROP TABLE IF EXISTS `blog`;
-CREATE TABLE `blog`
-(
-    `id`           bigint(20) UNSIGNED                                            NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `user_id`      bigint(20) UNSIGNED                                            NOT NULL COMMENT '用户id',
-    `title`        varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '标题',
-    `images`       varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL     DEFAULT NULL COMMENT '图片，最多9张，多张以\",\"隔开',
-    `content`      varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文章',
-    `liked_num`    int(8) UNSIGNED                                                NULL     DEFAULT 0 COMMENT '点赞数量',
-    `comments_num` int(8) UNSIGNED                                                NULL     DEFAULT 0 COMMENT '评论数量',
-    `create_time`  timestamp                                                      NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`  timestamp                                                      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 19
-  CHARACTER SET = utf8mb4
-  COLLATE = utf8mb4_general_ci
-  ROW_FORMAT = COMPACT;
-
-
--- ----------------------------
--- 用户关注表
--- ----------------------------
-DROP TABLE IF EXISTS `follow`;
-CREATE TABLE `follow`
-(
-    `id`             bigint(20)          NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `user_id`        bigint(20) UNSIGNED NOT NULL COMMENT '用户id',
-    `follow_user_id` bigint(20) UNSIGNED NOT NULL COMMENT '关注的用户id',
-    `create_time`    timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`    timestamp           NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `is_delete`      tinyint(4)          NULL     DEFAULT 0 COMMENT '逻辑删除',
-    PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 44
-  CHARACTER SET = utf8
-  COLLATE = utf8_general_ci
-  ROW_FORMAT = COMPACT;
-
-
-DROP TABLE IF EXISTS `blogLike`;
-CREATE TABLE `blogLike`
-(
-    `id`          bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `blog_id`     bigint(20) NOT NULL COMMENT '博文id',
-    `user_id`     bigint(20) NOT NULL COMMENT '用户id',
-    `create_time` datetime   NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time` datetime   NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-    `is_delete`   tinyint(4) NULL DEFAULT 0 COMMENT '逻辑删除',
-    PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB
-  AUTO_INCREMENT = 4
-  CHARACTER SET = utf8
-  COLLATE = utf8_general_ci
-  ROW_FORMAT = COMPACT;
 

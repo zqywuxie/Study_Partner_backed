@@ -61,7 +61,7 @@ public class FriendApplicationController {
 					@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<Boolean> addFriendRecords(@RequestBody FriendAddRequest friendAddRequest, HttpServletRequest request) {
 		if (friendAddRequest == null) {
-			throw new ResultException(ErrorCode.PARAMS_ERROR, "请求有误");
+			throw new ResultException(ErrorCode.NULL_ERROR, "请求参数有误");
 		}
 		User loginUser = userService.getLoginUser(request);
 		boolean addStatus = friendApplicationService.addFriendRecords(loginUser, friendAddRequest);

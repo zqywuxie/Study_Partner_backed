@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.springframework.beans.BeanUtils;
 
 /**
  * 消息vo
@@ -52,4 +53,6 @@ public class MessageVO extends Message {
 
 	@ApiModelProperty(value = "好友申请")
 	private FriendsRecordVO friendsRecordVO;
+
+
 }

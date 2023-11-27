@@ -3,9 +3,7 @@ package com.example.studypartner.controller;
 
 import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.common.ErrorCode;
-import com.example.studypartner.domain.entity.Message;
 import com.example.studypartner.domain.entity.User;
-import com.example.studypartner.domain.enums.MessageTypeEnum;
 import com.example.studypartner.domain.vo.UserVO;
 import com.example.studypartner.exception.ResultException;
 import com.example.studypartner.manager.RedisLimiterManager;
@@ -23,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-
-import static com.example.studypartner.constant.RedisConstants.MESSAGE_FOLLOW_MESSAGES_KEY;
 
 /**
  * 关注控制器
@@ -79,20 +75,7 @@ public class FollowController {
 			throw new ResultException(ErrorCode.TOO_MANY_REQUEST, "请求过于频繁");
 		}
 		followService.followUser(id, loginUserId);
-		// 添加点赞消息
-		Message message = new Message();
-		message.setType(MessageTypeEnum.FOLLOW_NOTIFICATIONS.getValue());
-		message.setFromId(loginUserId);
-		message.setToId(id);
-		message.setData(String.valueOf(id));
-		messageService.save(message);
-		String likeNumKey = MESSAGE_FOLLOW_MESSAGES_KEY + loginUserId;
-		Boolean hasKey = redisTemplate.hasKey(likeNumKey);
-		if (Boolean.TRUE.equals(hasKey)) {
-			redisTemplate.opsForValue().increment(likeNumKey);
-		} else {
-			redisTemplate.opsForValue().set(likeNumKey, "1");
-		}
+
 
 		return ResultUtils.success("ok");
 	}
@@ -133,12 +116,12 @@ public class FollowController {
 	@ApiOperation(value = "我关注数")
 	@ApiImplicitParams(
 			{@ApiImplicitParam(name = "request", value = "request请求")})
-	public CommonResult<Integer> myAttentionCount(HttpServletRequest request) {
+	public CommonResult<Integer> myFollowCount(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN);
 		}
-		return ResultUtils.success(followService.myAttentionCount(loginUser.getId()));
+		return ResultUtils.success(followService.myFollowCount(loginUser.getId()));
 	}
 
 	/**

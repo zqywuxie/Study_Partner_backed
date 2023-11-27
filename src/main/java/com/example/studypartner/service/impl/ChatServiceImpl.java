@@ -194,13 +194,13 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 	//todo
 	@Override
 	public List<UserVO> getPrivateUser(User loginUser) {
-
 		return userService.list(new LambdaQueryWrapper<User>()
 				.in(User::getId, this.list(
 						new LambdaQueryWrapper<Chat>()
 								.select(Chat::getToId)
 								.eq(Chat::getFromId, loginUser.getId())
 								.groupBy(Chat::getToId)
+								.isNotNull(Chat::getToId)
 				).stream().map(Chat::getToId).collect(Collectors.toList()))
 		).stream().map(user -> {
 			UserVO userVO = new UserVO();

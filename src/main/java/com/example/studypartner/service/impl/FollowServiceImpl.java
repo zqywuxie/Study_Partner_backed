@@ -59,10 +59,10 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 			this.save(follow);
 
 			Message message = new Message();
-			message.setType(MessageTypeEnum.FRIEND_APPLICATION.getValue());
+			message.setType(MessageTypeEnum.FOLLOW_NOTIFICATIONS.getValue());
 			message.setFromId(userId);
 			message.setToId(followUserId);
-			message.setData(String.valueOf(followUserId));
+			message.setData(String.valueOf(userId));
 			messageService.save(message);
 			String likeNumKey = MESSAGE_FOLLOW_MESSAGES_KEY + followUserId;
 			Boolean hasKey = redisTemplate.hasKey(likeNumKey);
@@ -72,6 +72,15 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 				redisTemplate.opsForValue().set(likeNumKey, "1");
 			}
 		} else {
+			Message message = new Message();
+			message.setType(MessageTypeEnum.FOLLOW_NOTIFICATIONS.getValue());
+			message.setFromId(userId);
+			message.setToId(followUserId);
+			LambdaQueryWrapper<Message> messageLambdaQueryWrapper = new LambdaQueryWrapper<>();
+			messageLambdaQueryWrapper.eq(Message::getType, MessageTypeEnum.FRIEND_APPLICATION.getValue())
+					.eq(Message::getFromId, userId)
+					.eq(Message::getToId, followUserId);
+			messageService.remove(messageLambdaQueryWrapper);
 			this.remove(followLambdaQueryWrapper);
 		}
 	}
@@ -128,7 +137,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 	}
 
 	@Override
-	public Integer myAttentionCount(Long loginUser) {
+	public Integer myFollowCount(Long loginUser) {
 		String key = FOLLOW_COUNT_KEY + loginUser;
 		Integer cachedFansCount = (Integer) redisTemplate.opsForValue().get(key);
 
@@ -137,7 +146,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 			return cachedFansCount;
 		}
 		LambdaQueryWrapper<Follow> followLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		followLambdaQueryWrapper.eq(Follow::getFollowUserId, loginUser);
+		followLambdaQueryWrapper.eq(Follow::getUserId, loginUser);
 		long count = this.count(followLambdaQueryWrapper);
 		redisTemplate.opsForValue().set(key, count);
 		redisTemplate.expire(key, 1, TimeUnit.HOURS);

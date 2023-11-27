@@ -4,6 +4,7 @@ package com.example.studypartner.controller;
 import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.common.ErrorCode;
 import com.example.studypartner.constant.RedisConstants;
+import com.example.studypartner.domain.entity.Message;
 import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.vo.BlogVO;
 import com.example.studypartner.domain.vo.MessageVO;
@@ -54,16 +55,29 @@ public class MessageController {
 	 * @param request 请求
 	 * @return {@link CommonResult}<{@link Long}>
 	 */
-	@GetMapping("/num")
+	@GetMapping("/num/{type}")
 	@ApiOperation(value = "获得消息数量")
 	@ApiImplicitParams(
 			{@ApiImplicitParam(name = "type", value = "数据类型"), @ApiImplicitParam(name = "request", value = "request请求")})
-	public CommonResult<Long> getUserMessageNum(@RequestParam String type, HttpServletRequest request) {
+	public CommonResult<Long> getUserMessageNum(@PathVariable("type") String type, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
 			return ResultUtils.success(0L);
 		}
 		long messageNum = messageService.getMessageNum(loginUser.getId(), Integer.valueOf(type));
+		return ResultUtils.success(messageNum);
+	}
+
+	@GetMapping("/read/{type}")
+	@ApiOperation(value = "消息已读")
+	@ApiImplicitParams(
+			{@ApiImplicitParam(name = "type", value = "数据类型"), @ApiImplicitParam(name = "request", value = "request请求")})
+	public CommonResult<Boolean> readMessage(@PathVariable("type") String type, HttpServletRequest request) {
+		User loginUser = userService.getLoginUser(request);
+		if (loginUser == null) {
+			return ResultUtils.failed(ErrorCode.NOT_LOGIN);
+		}
+		Boolean messageNum = messageService.readMessage(loginUser.getId(), Integer.valueOf(type));
 		return ResultUtils.success(messageNum);
 	}
 
@@ -74,17 +88,17 @@ public class MessageController {
 	 * @param request 请求
 	 * @return {@link CommonResult}<{@link List}<{@link MessageVO}>>
 	 */
-	@GetMapping("/get")
-	@ApiOperation(value = "获取用户博客消息")
+	@GetMapping("/get/{type}")
+	@ApiOperation(value = "获取通知消息")
 	@ApiImplicitParams(
 			{@ApiImplicitParam(name = "type", value = "消息类型"),
 					@ApiImplicitParam(name = "request", value = "request请求")})
-	public CommonResult<List<MessageVO>> getUserBlogMessage(@RequestParam String type, HttpServletRequest request) {
+	public CommonResult<List<MessageVO>> getUserBlogMessage(@PathVariable("type") String type, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN);
 		}
-		List<MessageVO> blogVOList = messageService.getMessages(loginUser.getId(), Integer.valueOf(type));
-		return ResultUtils.success(blogVOList);
+		List<MessageVO> readMessage = messageService.getMessages(loginUser.getId(), Integer.valueOf(type));
+		return ResultUtils.success(readMessage);
 	}
 }

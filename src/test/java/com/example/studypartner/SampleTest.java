@@ -96,7 +96,7 @@ public class SampleTest {
 		chatLambdaQueryWrapper.select(Chat::getToId).eq(Chat::getFromId, 3L).groupBy(Chat::getToId);
 		List<Long> collect = chatService.list(chatLambdaQueryWrapper).stream().map(Chat::getToId).collect(Collectors.toList());
 		LambdaQueryWrapper<User> userVOLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		userVOLambdaQueryWrapper.in(User::getId,collect);
+		userVOLambdaQueryWrapper.in(User::getId, collect);
 		List<User> list = userService.list(userVOLambdaQueryWrapper);
 		System.out.println(list);
 	}
@@ -142,4 +142,25 @@ public class SampleTest {
 //        teamService.listTeams()
 //    }
 
+	private Integer code;
+
+}
+
+class INNER {
+	private int n1 = 100;
+	private static final int n2 = 10;
+
+	private void m1() {
+	}
+
+	public void m2() {//成员方法
+		class inner01 { //局部内部类
+			private static final int n3 = 10;
+
+			public void f1() {
+				System.out.println(n1);
+				m1();
+			}
+		}
+	}
 }
