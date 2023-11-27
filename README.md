@@ -21,8 +21,7 @@
 
 该系统为**大学生**提供一个方便的交友平台，用户可以设置自己的标签来快速的匹配与自己相符的伙伴，并且可以创建队伍来进行组队打比赛等。极大的减小了找寻合适的伙伴成本。
 
-该项目后端采用主流的Java语言，适用spring
-boot框架快速搭建，前端采用Vue框架，适用Vant组件库进行搭建H5移动界面。采用单机架构开发，适用于小型应用程序，减少复杂性和维护成本，当然开发者可以选择进行微服务架构开发。
+该项目后端采用主流的Java语言，适用SpringBoot框架快速搭建，前端采用Vue框架，适用Vant组件库进行搭建H5移动界面。采用单机架构开发，适用于小型应用程序，减少复杂性和维护成本，当然开发者可以选择进行微服务架构开发。
 
 ## 项目背景
 
@@ -263,6 +262,12 @@ server:
 
 ## 部署
 
+注意前端websocket请求要改变
+配置后面nginx的配置,因为使用ws是http协议,https无法使用http
+```html
+    let socketUrl = `wss://www.zqywuku.top/api/websocket/${uid}/${stats.value.team.teamId}`
+```
+
 ![image-20230918190150746](https://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/09/017/image-20230918190150746.png)
 
 ![image-20230918190324669](https://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/09/017/image-20230918190324669.png)
@@ -274,16 +279,28 @@ server:
 ![image-20230918190546133](https://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/09/017/image-20230918190546133.png)
 
 ```nginx
-location / {
-    try_files $uri $uri/ @router;#需要指向下面的@router否则会出现vue的路由在nginx中刷新出现404
-    index  index.html index.htm;
-}
-#对应上面的@router，主要原因是路由的路径资源并不是一个真实的路径，所以无法找到具体的文件
-#因此需要rewrite到index.html中，然后交给路由在处理请求资源
-location @router {
-    rewrite ^.*$ /index.html last;
-}
+    # HTTP反向代理相关配置结束 <<<
+    location / {
+        try_files $uri $uri/ @router;#需要指向下面的@router否则会出现vue的路由在nginx中刷新出现404
+        index  index.html index.htm;
+    }
+    #对应上面的@router，主要原因是路由的路径资源并不是一个真实的路径，所以无法找到具体的文件
+    #因此需要rewrite到index.html中，然后交给路由在处理请求资源
+    location @router {
+        rewrite ^.*$ /index.html last;
+    }
+    #通过配置端口指向部署websocker的项目
+    location /wss/  {   
+        proxy_pass http://127.0.0.1:8081/;        
+        proxy_http_version 1.1;    
+        proxy_set_header Upgrade $http_upgrade;    
+        proxy_set_header Connection "Upgrade";    
+        proxy_set_header X-real-ip $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+     }
+
 ```
+
 
 ## 项目展示
 

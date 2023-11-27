@@ -115,7 +115,6 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 				}
 
 
-
 				String friendApplication = MESSAGE_COMMENT_NUM_KEY + receiveId;
 				Boolean hasKey = redisTemplate.hasKey(friendApplication);
 				if (Boolean.TRUE.equals(hasKey)) {
@@ -132,12 +131,22 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 			return false;
 		} finally {
 			// todo 添加消息
-			Message message = new Message();
-			message.setType(MessageTypeEnum.FRIEND_APPLICATION.getValue());
-			message.setFromId(loginUserId);
-			message.setToId(receiveId);
-			message.setData(String.valueOf(loginUser.getId()));
-			messageService.save(message);
+			LambdaQueryWrapper<Message> queryWrapper = new LambdaQueryWrapper<>();
+			queryWrapper.eq(Message::getType, MessageTypeEnum.FRIEND_APPLICATION.getValue())
+					.eq(Message::getFromId, loginUserId)
+					.eq(Message::getToId, receiveId)
+					.eq(Message::getData, String.valueOf(loginUser.getId()));
+			long count = messageService.count(queryWrapper);
+			if (count == 0) {
+				Message message = new Message();
+				message.setType(MessageTypeEnum.FRIEND_APPLICATION.getValue());
+				message.setFromId(loginUserId);
+				message.setToId(receiveId);
+				message.setData(String.valueOf(loginUser.getId()));
+
+				messageService.save(message);
+			}
+
 			// 只能释放自己的锁
 			if (lock.isHeldByCurrentThread()) {
 				System.out.println("unLock: " + Thread.currentThread().getId());
@@ -170,9 +179,9 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 		// 查询出当前用户所有申请、同意记录
 		LambdaQueryWrapper<FriendApplication> friendApplicationLambdaQueryWrapper = new LambdaQueryWrapper<>();
 		friendApplicationLambdaQueryWrapper.eq(FriendApplication::getReceiveId, loginUser.getId());
-		List<FriendApplication> FriendApplicationList = this.list(friendApplicationLambdaQueryWrapper);
-		Collections.reverse(FriendApplicationList);
-		return FriendApplicationList.stream().map(friend -> {
+		List<FriendApplication> friendApplications = this.list(friendApplicationLambdaQueryWrapper);
+		Collections.reverse(friendApplications);
+		return friendApplications.stream().map(friend -> {
 			FriendsRecordVO friendsRecordVO = new FriendsRecordVO();
 			BeanUtils.copyProperties(friend, friendsRecordVO);
 			User user = userService.getById(friend.getFromId());

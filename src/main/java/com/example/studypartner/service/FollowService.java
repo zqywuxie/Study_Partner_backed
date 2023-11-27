@@ -21,7 +21,7 @@ public interface FollowService extends IService<Follow> {
 	 * @return
 	 */
 
-	void followUser(Long id, Long followerId);
+	void followUser(Long loginUserId, Long followerId);
 
 
 	/**

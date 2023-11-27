@@ -75,11 +75,24 @@ public class MailController {
 		String captcha = RandomUtil.randomNumbers(4);
 		try {
 			mailService.sendMail(email, captcha);
-			redisTemplate.opsForValue().set(CAPTCHA_CACHE_KEY + email, captcha, 5, TimeUnit.MINUTES);
+			redisTemplate.opsForValue().set(CAPTCHA_CACHE_KEY + email, captcha, 2, TimeUnit.MINUTES);
 			return ResultUtils.success(captcha);
 		} catch (Exception e) {
 			log.error("【发送验证码失败】" + e.getMessage());
 			return ResultUtils.failed(ErrorCode.OPERATION_ERROR, "验证码获取失败");
+		}
+	}
+
+
+	@GetMapping("/getCaptcha/{email}")
+	public CommonResult<String> getCaptchaFromRedis(@PathVariable String email) {
+		String key = CAPTCHA_CACHE_KEY + email;
+		Boolean hasKey = redisTemplate.hasKey(key);
+		if (Boolean.TRUE.equals(hasKey)) {
+			String s = redisTemplate.opsForValue().get(CAPTCHA_CACHE_KEY + email);
+			return ResultUtils.success(s);
+		} else {
+			return ResultUtils.failed(ErrorCode.NULL_ERROR);
 		}
 	}
 

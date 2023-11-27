@@ -463,13 +463,13 @@ public class WebSocket {
      */
     public void sendAllUsers() {
         HashMap<String, List<WebSocketVO>> stringListHashMap = new HashMap<>(0);
-        List<WebSocketVO> WebSocketVOs = new ArrayList<>();
-        stringListHashMap.put("users", WebSocketVOs);
+        List<WebSocketVO> webSocketVOS = new ArrayList<>();
+        stringListHashMap.put("users", webSocketVOS);
         for (Serializable key : SESSION_POOL.keySet()) {
             User user = userService.getById(key);
             WebSocketVO WebSocketVO = new WebSocketVO();
             BeanUtils.copyProperties(user, WebSocketVO);
-            WebSocketVOs.add(WebSocketVO);
+            webSocketVOS.add(WebSocketVO);
         }
         sendAllMessage(JSONUtil.toJsonStr(stringListHashMap));
     }

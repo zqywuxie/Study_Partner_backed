@@ -48,47 +48,84 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 	private RedisTemplate redisTemplate;
 
 	@Override
-	public void followUser(Long followUserId, Long userId) {
+	public void followUser(Long userId, Long followerId) {
 		LambdaQueryWrapper<Follow> followLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		followLambdaQueryWrapper.eq(Follow::getUserId, followUserId).eq(Follow::getFollowUserId, userId);
+		followLambdaQueryWrapper.eq(Follow::getUserId, userId).eq(Follow::getFollowUserId, followerId);
 		long count = this.count(followLambdaQueryWrapper);
+		String fansNumKey = FANS_COUNT_KEY + followerId;
+		String followNumKey = FOLLOW_COUNT_KEY + userId;
+		String messageFollowKey = MESSAGE_FOLLOW_MESSAGES_KEY + followerId;
 		if (count == 0) {
 			Follow follow = new Follow();
-			follow.setFollowUserId(userId);
-			follow.setUserId(followUserId);
+			follow.setFollowUserId(followerId);
+			follow.setUserId(userId);
 			this.save(follow);
 
 			Message message = new Message();
 			message.setType(MessageTypeEnum.FOLLOW_NOTIFICATIONS.getValue());
 			message.setFromId(userId);
-			message.setToId(followUserId);
+			message.setToId(followerId);
 			message.setData(String.valueOf(userId));
 			messageService.save(message);
-			String likeNumKey = MESSAGE_FOLLOW_MESSAGES_KEY + followUserId;
-			Boolean hasKey = redisTemplate.hasKey(likeNumKey);
-			if (Boolean.TRUE.equals(hasKey)) {
-				redisTemplate.opsForValue().increment(likeNumKey);
+
+
+			Boolean hasKey = redisTemplate.hasKey(messageFollowKey);
+			Boolean hasKey1 = redisTemplate.hasKey(fansNumKey);
+			Boolean hasKey2 = redisTemplate.hasKey(followNumKey);
+			if (Boolean.TRUE.equals(hasKey1)) {
+				redisTemplate.opsForValue().increment(fansNumKey);
 			} else {
-				redisTemplate.opsForValue().set(likeNumKey, "1");
+				redisTemplate.opsForValue().set(fansNumKey, 1);
+			}
+			if (Boolean.TRUE.equals(hasKey)) {
+				redisTemplate.opsForValue().increment(messageFollowKey);
+			} else {
+				redisTemplate.opsForValue().set(messageFollowKey, 1);
+			}
+			if (Boolean.TRUE.equals(hasKey2)) {
+				redisTemplate.opsForValue().increment(followNumKey);
+			} else {
+				redisTemplate.opsForValue().set(followNumKey, 1);
 			}
 		} else {
 			Message message = new Message();
 			message.setType(MessageTypeEnum.FOLLOW_NOTIFICATIONS.getValue());
 			message.setFromId(userId);
-			message.setToId(followUserId);
+			message.setToId(followerId);
 			LambdaQueryWrapper<Message> messageLambdaQueryWrapper = new LambdaQueryWrapper<>();
 			messageLambdaQueryWrapper.eq(Message::getType, MessageTypeEnum.FRIEND_APPLICATION.getValue())
 					.eq(Message::getFromId, userId)
-					.eq(Message::getToId, followUserId);
+					.eq(Message::getToId, followerId);
+
+			Boolean hasKey = redisTemplate.hasKey(messageFollowKey);
+			Boolean hasKey1 = redisTemplate.hasKey(fansNumKey);
+			Boolean hasKey2 = redisTemplate.hasKey(followNumKey);
+
+			//todo 优化代码
+			if (Boolean.TRUE.equals(hasKey1)) {
+				redisTemplate.opsForValue().decrement(fansNumKey);
+			} else {
+				redisTemplate.opsForValue().set(fansNumKey, 0);
+			}
+			if (Boolean.TRUE.equals(hasKey)) {
+				redisTemplate.opsForValue().decrement(messageFollowKey);
+			} else {
+				redisTemplate.opsForValue().set(messageFollowKey, 0);
+			}
+			if (Boolean.TRUE.equals(hasKey2)) {
+				redisTemplate.opsForValue().decrement(followNumKey);
+			} else {
+				redisTemplate.opsForValue().set(followNumKey, 0);
+			}
 			messageService.remove(messageLambdaQueryWrapper);
 			this.remove(followLambdaQueryWrapper);
 		}
 	}
 
 	@Override
-	public List<UserVO> listFans(Long userId) {
+	public List<UserVO> listFans(Long loginUser) {
 		LambdaQueryWrapper<Follow> followLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		followLambdaQueryWrapper.eq(Follow::getFollowUserId, userId);
+		followLambdaQueryWrapper.eq(Follow::getFollowUserId, loginUser);
 		List<Follow> list = this.list(followLambdaQueryWrapper);
 		if (list == null || list.size() == 0) {
 			return new ArrayList<>();
@@ -98,7 +135,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 			UserVO userVO = new UserVO();
 			BeanUtils.copyProperties(item, userVO);
 			LambdaQueryWrapper<Follow> lambdaQueryWrapper = new LambdaQueryWrapper<>();
-			lambdaQueryWrapper.eq(Follow::getUserId, userId).eq(Follow::getFollowUserId, item.getId());
+			lambdaQueryWrapper.eq(Follow::getUserId, loginUser).eq(Follow::getFollowUserId, item.getId());
 			long count = this.count(lambdaQueryWrapper);
 			userVO.setIsFollow(count > 0);
 			return userVO;
@@ -106,9 +143,9 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 	}
 
 	@Override
-	public List<UserVO> listMyFollow(Long userId) {
+	public List<UserVO> listMyFollow(Long loginUser) {
 		LambdaQueryWrapper<Follow> followLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		followLambdaQueryWrapper.eq(Follow::getUserId, userId);
+		followLambdaQueryWrapper.eq(Follow::getUserId, loginUser);
 		List<Follow> list = this.list(followLambdaQueryWrapper);
 		List<User> userList = list.stream().map((follow -> userService.getById(follow.getFollowUserId()))).collect(Collectors.toList());
 		return userList.stream().map((user) -> {
@@ -129,7 +166,7 @@ public class FollowServiceImpl extends ServiceImpl<FollowMapper, Follow>
 			return cachedFansCount;
 		}
 		LambdaQueryWrapper<Follow> followLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		followLambdaQueryWrapper.eq(Follow::getUserId, loginUser);
+		followLambdaQueryWrapper.eq(Follow::getFollowUserId, loginUser);
 		long count = this.count(followLambdaQueryWrapper);
 		redisTemplate.opsForValue().set(key, count);
 		redisTemplate.expire(key, 1, TimeUnit.HOURS);

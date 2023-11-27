@@ -16,5 +16,5 @@ public interface EmailConstant {
 	/**
 	 * 电子邮件主题
 	 */
-	String EMAIL_SUBJECT = "验证码邮件";
+	String EMAIL_SUBJECT = "（志同道合）验证码邮件";
 }

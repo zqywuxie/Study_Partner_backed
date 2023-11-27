@@ -58,12 +58,12 @@ public class FollowController {
 	 * @param request 请求
 	 * @return {@link CommonResult}<{@link String}>
 	 */
-	@PostMapping("/{id}")
+	@PostMapping("/{followerId}")
 	@ApiOperation(value = "关注用户")
 	@ApiImplicitParams(
 			{@ApiImplicitParam(name = "id", value = "关注用户id"),
 					@ApiImplicitParam(name = "request", value = "request请求")})
-	public CommonResult<String> followUser(@PathVariable Long id, HttpServletRequest request) {
+	public CommonResult<String> followUser(@PathVariable Long followerId, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN, "未登录");
@@ -74,7 +74,7 @@ public class FollowController {
 		if (!rateLimit) {
 			throw new ResultException(ErrorCode.TOO_MANY_REQUEST, "请求过于频繁");
 		}
-		followService.followUser(id, loginUserId);
+		followService.followUser(loginUserId, followerId);
 
 
 		return ResultUtils.success("ok");

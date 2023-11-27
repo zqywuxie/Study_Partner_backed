@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 好友vo
@@ -35,4 +36,7 @@ public class FriendsRecordVO implements Serializable {
 	 */
 	@ApiModelProperty(value = "申请用户")
 	private UserVO applyUser;
+
+	@ApiModelProperty(value = "申请时间")
+	private Date createTime;
 }

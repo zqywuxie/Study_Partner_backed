@@ -43,7 +43,7 @@ public class MailServiceImpl implements MailService {
 		// 邮箱标题
 		helper.setSubject(EMAIL_SUBJECT);
 		// 邮箱内容
-		helper.setText(captcha, true);
+		helper.setText("你的验证码为: " + captcha + "，有效期为2分钟。", true);
 		mailSender.send(message);
 
 	}

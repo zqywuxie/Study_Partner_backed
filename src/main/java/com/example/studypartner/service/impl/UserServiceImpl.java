@@ -264,9 +264,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 		UserVO uservo = new UserVO();
 		BeanUtils.copyProperties(user, uservo);
 		LambdaQueryWrapper<Follow> followQueryWrapper = new LambdaQueryWrapper<>();
-		followQueryWrapper.eq(Follow::getUserId, id).eq(Follow::getFollowUserId, loginUser.getId());
-		long Isfollow = followService.count(followQueryWrapper);
-		uservo.setIsFollow(Isfollow > 0);
+		followQueryWrapper.eq(Follow::getUserId, loginUser.getId()).eq(Follow::getFollowUserId, id);
+		long follow = followService.count(followQueryWrapper);
+		uservo.setIsFollow(follow > 0);
 		return uservo;
 	}
 
@@ -352,7 +352,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 		}
 		User selectUser = userMapper.selectById(user.getId());
 		if (selectUser == null) {
-			throw new ResultException(ErrorCode.NULL_ERROR,"修改用户不存在");
+			throw new ResultException(ErrorCode.NULL_ERROR, "修改用户不存在");
 		}
 		return userMapper.updateById(user);
 	}
