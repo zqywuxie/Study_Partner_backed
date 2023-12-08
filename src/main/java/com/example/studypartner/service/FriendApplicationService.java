@@ -13,7 +13,7 @@ import java.util.Set;
 /**
 * @author wuxie
 * @description 针对表【friends(好友申请管理表)】的数据库操作Service
-* @createDate 2023-06-18 14:10:45
+* @createDate 2023-11-18 14:10:45
 */
 public interface FriendApplicationService extends IService<FriendApplication> {
 

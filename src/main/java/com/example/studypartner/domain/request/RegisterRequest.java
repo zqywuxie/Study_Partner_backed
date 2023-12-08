@@ -16,14 +16,14 @@ import java.io.Serializable;
 public class RegisterRequest implements Serializable {
 	private static final long serialVersionUID = -2227307106629029499L;
 	@ApiModelProperty("用户账号")
-	private String userAccount;
+	private String useraccount;
 
 
 	@ApiModelProperty("用户名")
 	private String userName;
 
 	@ApiModelProperty("用户密码")
-	private String userPassword;
+	private String password;
 
 	@ApiModelProperty("核实密码")
 	private String checkPassword;

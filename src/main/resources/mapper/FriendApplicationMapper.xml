@@ -6,19 +6,15 @@
 
     <resultMap id="BaseResultMap" type="com.example.studypartner.domain.entity.FriendApplication">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="fromId" column="fromId" jdbcType="BIGINT"/>
-            <result property="receiveId" column="receiveId" jdbcType="BIGINT"/>
-            <result property="isRead" column="isRead" jdbcType="TINYINT"/>
+            <result property="fromId" column="from_id" jdbcType="BIGINT"/>
+            <result property="receiveId" column="receive_id" jdbcType="BIGINT"/>
+            <result property="isRead" column="is_read" jdbcType="TINYINT"/>
             <result property="status" column="status" jdbcType="TINYINT"/>
-            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="deleted" jdbcType="TINYINT"/>
             <result property="remark" column="remark" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,fromId,receiveId,
-        isRead,status,createTime,
-        updateTime,isDelete,remark
-    </sql>
+
 </mapper>

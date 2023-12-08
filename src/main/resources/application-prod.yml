@@ -7,7 +7,7 @@ spring:
     # 发送者邮箱（根据自己邮箱填写）
     username: xxx
     #  配置密码，注意是开启POP3/SMTP的授权密码(根据自己的授权密码填写)
-    password: xxx
+    password: xxxx
 
     properties:
       mail:
@@ -45,7 +45,7 @@ spring:
 mybatis-plus:
   configuration:
     #    mybatis-plus 关闭驼峰转换下划线功能
-    map-underscore-to-camel-case: false
+    map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 # 增加统一前缀/api
 server:
@@ -53,7 +53,7 @@ server:
     context-path: /api
     session:
       cookie:
-        domain: zqywuku.top
+        domain: 上线域名
         secure: true
   port: 10091
 

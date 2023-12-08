@@ -1,9 +1,11 @@
 package com.example.studypartner.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.request.RegisterRequest;
 import com.example.studypartner.domain.vo.UserVO;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.List;
  */
 public interface UserService extends IService<User> {
 	/**
-	 * @param userAccount     账号
+	 * @param useraccount   账号
 	 * @param password      账号密码
 	 * @param checkPassword 校验密码
 	 * @return 返回用户id
@@ -24,15 +26,17 @@ public interface UserService extends IService<User> {
 
 	/**
 	 * 登录
-	 * @param userAccount
-	 * @param userPassword
+	 *
+	 * @param useraccount
+	 * @param password
 	 * @param request
 	 * @return
 	 */
-	User login(String userAccount, String userPassword, HttpServletRequest request);
+	User login(String useraccount, String password, HttpServletRequest request);
 
 	/**
 	 * 根据邮箱登录
+	 *
 	 * @param email
 	 * @param request
 	 * @return
@@ -90,4 +94,9 @@ public interface UserService extends IService<User> {
 	List<User> matchUsers(long num, User loginUser);
 
 	void updatePassword(String phone, String password);
+
+
+	List<User> searchUserByName(String name);
+
+	Page<User> recommend(Long pageSize, Long currentPage,Long userId);
 }

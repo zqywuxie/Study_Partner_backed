@@ -9,8 +9,8 @@ import com.example.studypartner.exception.ResultException;
  */
 public enum TeamStatus {
     PUBLIC(0, "公开"),
-    PRIVATE(1, "私人"),
-    SECRET(2, "加密");
+    PRIVATE(1, "加密"),
+    BANDED(2, "封禁");
 
     private int value;
     private String text;

@@ -34,7 +34,7 @@ public class RedisLimiterManager {
 		// 参数2 rate：限流速率，即单位时间内允许通过的请求数量。
 		// 参数3 rateInterval：限流时间间隔，即限流速率的计算周期长度。
 		// 参数4 unit：限流时间间隔单位，可以是秒、毫秒等。
-		boolean trySetRate = rateLimiter.trySetRate(RateType.OVERALL, 2, 2, RateIntervalUnit.SECONDS);
+		boolean trySetRate = rateLimiter.trySetRate(RateType.OVERALL, 2, 1, RateIntervalUnit.SECONDS);
 		if (trySetRate) {
 			log.info("init rate = {}, interval = {}", rateLimiter.getConfig().getRate(), rateLimiter.getConfig().getRateInterval());
 		}

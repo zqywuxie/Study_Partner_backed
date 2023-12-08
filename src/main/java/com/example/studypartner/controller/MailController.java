@@ -65,6 +65,12 @@ public class MailController {
 			return ResultUtils.failed(ErrorCode.PARAMS_ERROR, "不合法的邮箱地址！");
 		}
 
+		Boolean hasKey = redisTemplate.hasKey(CAPTCHA_CACHE_KEY + email);
+		if (Boolean.TRUE.equals(hasKey)) {
+			String captcha = redisTemplate.opsForValue().get(CAPTCHA_CACHE_KEY + email);
+			return ResultUtils.success(captcha);
+		}
+
 //		// 验证是否存在
 //		LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
 //		wrapper.eq(User::getEmail, email);

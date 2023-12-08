@@ -62,6 +62,7 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 		comments.setLikedNum(0);
 		comments.setStatus(0);
 		this.save(comments);
+
 		Blog blog = blogService.getById(addCommentRequest.getBlogId());
 		LambdaUpdateWrapper<Blog> blogLambdaUpdateWrapper = new LambdaUpdateWrapper<>();
 		blogLambdaUpdateWrapper.eq(Blog::getId, addCommentRequest.getBlogId())
@@ -76,12 +77,13 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 		//添加评论内容
 		message.setData(String.valueOf(comments.getId()));
 		messageService.save(message);
+		//todo
 		String likeNumKey = MESSAGE_COMMENT_NUM_KEY + blog.getUserId();
 		Boolean hasKey = redisTemplate.hasKey(likeNumKey);
 		if (Boolean.TRUE.equals(hasKey)) {
 			redisTemplate.opsForValue().increment(likeNumKey);
 		} else {
-			redisTemplate.opsForValue().set(likeNumKey, "1");
+			redisTemplate.opsForValue().set(likeNumKey, 1);
 		}
 
 	}
@@ -142,7 +144,7 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 
 			// 评论点赞数增加
 			this.update().eq("id", commentId)
-					.set("likedNum", comments.getLikedNum() + 1).update();
+					.set("liked_num", comments.getLikedNum() + 1).update();
 
 			String likeNumKey = MESSAGE_LIKE_NUM_KEY + comments.getId();
 
@@ -178,7 +180,7 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 			}
 			// 评论点赞数减少
 			this.update().eq("id", commentId)
-					.set("likedNum", comments.getLikedNum() - 1).update();
+					.set("liked_num", comments.getLikedNum() - 1).update();
 		}
 	}
 
@@ -189,7 +191,7 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 		if (comments == null) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
 		}
-		if (!comments.getUserId().equals(user.getId()) && !UserConstant.ADMIN_ROLE.equals(user.getUserRole())) {
+		if (!comments.getUserId().equals(user.getId())) {
 			throw new ResultException(ErrorCode.NO_AUTH);
 		}
 		this.removeById(id);
@@ -243,6 +245,7 @@ public class CommentsServiceImpl extends ServiceImpl<CommentsMapper, Comments>
 	}
 
 
+	//todo
 	@Override
 	public List<CommentsVO> listMyBlogComments(Long id) {
 		return null;

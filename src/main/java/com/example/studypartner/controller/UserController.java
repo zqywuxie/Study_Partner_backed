@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.websocket.server.PathParam;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -71,12 +72,12 @@ public class UserController {
 		if (loginRequest == null) {
 			throw new ResultException(ErrorCode.NULL_ERROR);
 		}
-		String userAccount = loginRequest.getUserAccount();
-		String userPassword = loginRequest.getUserPassword();
-		if (StringUtils.isAllBlank(userAccount, userPassword)) {
+		String useraccount = loginRequest.getUseraccount();
+		String password = loginRequest.getPassword();
+		if (StringUtils.isAllBlank(useraccount, password)) {
 			throw new ResultException(ErrorCode.NULL_ERROR);
 		}
-		User user = userService.login(userAccount, userPassword, request);
+		User user = userService.login(useraccount, password, request);
 		return ResultUtils.success(user);
 	}
 
@@ -88,18 +89,17 @@ public class UserController {
 	 * @return
 	 */
 	@PostMapping("/email/login")
-	public CommonResult<User> LoginByEmail(@RequestBody LoginByEmailRequest loginByEmailRequest, HttpServletRequest httpServletRequest) {
+	public CommonResult<User> loginByEmail(@RequestBody LoginByEmailRequest loginByEmailRequest, HttpServletRequest request) {
 		if (loginByEmailRequest == null) {
 			return ResultUtils.failed(ErrorCode.NULL_ERROR);
 		}
 		String email = loginByEmailRequest.getEmail();
 		String captcha = loginByEmailRequest.getCaptcha();
 		String checkCaptcha = (String) redisTemplate.opsForValue().get(CAPTCHA_CACHE_KEY + email);
-		System.out.println(captcha + ":" + checkCaptcha);
 		if (!captcha.equals(checkCaptcha)) {
 			return ResultUtils.failed(ErrorCode.PARAMS_ERROR, "验证码不正确，请重新输入");
 		}
-		User user = userService.loginByEmail(email, httpServletRequest);
+		User user = userService.loginByEmail(email, request);
 		return ResultUtils.success(user);
 	}
 
@@ -120,27 +120,28 @@ public class UserController {
 	}
 
 	/**
-	 * 注册接口
+	 * 注册接口的数据验证方法
 	 *
 	 * @param registerRequest
-	 * @return
 	 */
 
 
 	private void validateRegistrationRequest(RegisterRequest registerRequest) {
 		if (registerRequest == null || StringUtils.isAnyBlank(
-				registerRequest.getUserAccount(),
-				registerRequest.getUserPassword(),
+				registerRequest.getUseraccount(),
+				registerRequest.getPassword(),
 				registerRequest.getCheckPassword(),
-//				registerRequest.getAvatarUrl(),
-//				registerRequest.getUserName(),
 				registerRequest.getEmail(),
 				registerRequest.getCaptcha())) {
 			throw new ResultException(ErrorCode.NULL_ERROR);
 		}
-		if (!registerRequest.getCheckPassword().equals(registerRequest.getUserPassword())) {
+		if (!registerRequest.getCheckPassword().equals(registerRequest.getPassword())) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR, "两次输入密码不一致");
 		}
+	}
+
+	public static boolean isNumeric(String str) {
+		return str.matches("-?\\d+(\\.\\d+)?");
 	}
 
 	@PostMapping("/register")
@@ -155,10 +156,6 @@ public class UserController {
 			return ResultUtils.success(register);
 		}
 		return ResultUtils.failed(ErrorCode.PARAMS_ERROR, register);
-	}
-
-	public static boolean isNumeric(String str) {
-		return str.matches("-?\\d+(\\.\\d+)?");
 	}
 
 	//endregion
@@ -179,7 +176,6 @@ public class UserController {
 
 		if (user == null) {
 			throw new ResultException(ErrorCode.NULL_ERROR);
-
 		}
 		boolean delete = userService.removeById(user);
 		return ResultUtils.success(delete);
@@ -187,11 +183,10 @@ public class UserController {
 
 
 	@GetMapping("/email")
-	// 电话号API有点麻烦
 	@ApiOperation(value = "通过邮箱查询用户")
 	@ApiImplicitParams(
 			{@ApiImplicitParam(name = "email", value = "邮箱")})
-	public CommonResult<String> getUserByEmail(String email) {
+	public CommonResult<String> getUserByEmail(@PathParam("email") String email) {
 		if (email == null) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
 		}
@@ -202,7 +197,7 @@ public class UserController {
 			return ResultUtils.failed(ErrorCode.NULL_ERROR, "该账号未绑定邮箱");
 		} else {
 			String key = RedisConstants.USER_FORGET_PASSWORD_KEY + email;
-			return ResultUtils.success(user.getUserAccount());
+			return ResultUtils.success(user.getUseraccount());
 		}
 	}
 
@@ -229,7 +224,6 @@ public class UserController {
 			{@ApiImplicitParam(name = "updatePasswordRequest", value = "修改密码请求")})
 	public CommonResult<String> updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
 		String email = updatePasswordRequest.getEmail();
-		// String code = updatePasswordRequest.getCode();
 		String password = updatePasswordRequest.getPassword();
 		if (StringUtils.isAnyBlank(email, password)) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
@@ -252,53 +246,25 @@ public class UserController {
 		if (!userService.isAdmin(request)) {
 			throw new ResultException(ErrorCode.NOT_ADMIN);
 		}
-		QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-
-		if (StringUtils.isNotBlank(username)) {
-			userQueryWrapper.like("username", username);
-		}
-		List<User> list = userService.list(userQueryWrapper);
-		List<User> userList = list.stream().map(user -> userService.cleanUser(user)).collect(Collectors.toList());
-		return ResultUtils.success(userList);
+		return ResultUtils.success(userService.searchUserByName(username));
 	}
 
 	/**
 	 * 主页推荐用户
 	 *
 	 * @param pageSize
-	 * @param pageNum
+	 * @param currentPage
 	 * @param request
 	 * @return
 	 */
 
 	@GetMapping("/recommend")
-	/**
-	 *
-	 */
-	public CommonResult<Page<User>> recommend(long pageSize, long pageNum, HttpServletRequest request) {
+	public CommonResult<Page<User>> recommend(@RequestParam Long pageSize, @RequestParam Long currentPage, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN);
 		}
-
-
-		//todo
-		String rediskey = USER_RECOMMEND_KEY + loginUser.getId();
-		ValueOperations valueOperations = redisTemplate.opsForValue();
-		Page<User> userPage = (Page<User>) valueOperations.get(rediskey);
-		if (userPage != null) {
-			ResultUtils.success(userPage);
-		}
-		//写缓存,并且设置缓存时间
-		QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-		Page<User> page = userService.page(new Page<>(pageNum, pageSize), userQueryWrapper);
-		try {
-			valueOperations.set(rediskey, page, 30000, TimeUnit.SECONDS);
-		} catch (Exception e) {
-			log.error("redis set key-value error");
-		}
-		System.out.println(page);
-		return ResultUtils.success(page);
+		return ResultUtils.success(userService.recommend(pageSize, currentPage, loginUser.getId()));
 	}
 
 
@@ -314,7 +280,6 @@ public class UserController {
 		User currentUser = userService.getLoginUser(request);
 		if (currentUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN);
-//            return null;
 		}
 		Long id = currentUser.getId();
 		User user = userService.getById(id);
@@ -339,33 +304,6 @@ public class UserController {
 
 		Integer result = userService.updateUser(user, request);
 		return ResultUtils.success(result);
-	}
-
-	/**
-	 * 添加数据
-	 *
-	 * @param user
-	 * @param request
-	 * @return
-	 */
-
-	@PostMapping("/insert")
-	public CommonResult<Boolean> insert(@RequestBody User user, HttpServletRequest request) {
-		if (!userService.isAdmin(request)) {
-			throw new ResultException(ErrorCode.NOT_ADMIN);
-		}
-		if (user == null) {
-			throw new ResultException(ErrorCode.NULL_ERROR);
-		}
-		QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
-		userQueryWrapper.eq("username", user.getUsername());
-		userQueryWrapper.eq("userAccount", user.getUserAccount());
-		User one = userService.getOne(userQueryWrapper);
-		if (one != null) {
-			throw new ResultException(ErrorCode.REPEAT_ERROR);
-		}
-		boolean save = userService.save(user);
-		return ResultUtils.success(save);
 	}
 
 	/**
@@ -396,7 +334,7 @@ public class UserController {
 		if (id == null) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
 		}
-		User loginUser = userService.getLoginUser(request);
+		User loginUser = userService.getById(userService.getLoginUser(request).getId());
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NULL_ERROR);
 		}
@@ -407,14 +345,12 @@ public class UserController {
 	@GetMapping("/match")
 	public CommonResult<List<User>> matchUsers(long num, HttpServletRequest request) {
 		if (num <= 0 || num > 20) {
-			throw new ResultException(ErrorCode.PARAMS_ERROR);
+			throw new ResultException(ErrorCode.PARAMS_ERROR, "查找数据过多");
 		}
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN);
 		}
 		return ResultUtils.success(userService.matchUsers(num, loginUser));
-
 	}
-
 }

@@ -25,7 +25,7 @@ public class UserVO implements Serializable {
 	/**
 	 * 账号
 	 */
-	private String userAccount;
+	private String useraccount;
 
 	/**
 	 * 用户头像
@@ -57,7 +57,7 @@ public class UserVO implements Serializable {
 	/**
 	 * 状态 0 - 正常
 	 */
-	private Integer userStatus;
+	private Integer status;
 
 	/**
 	 * 创建时间
@@ -69,10 +69,10 @@ public class UserVO implements Serializable {
 	 */
 	private Date updateTime;
 
-	/**
-	 * 用户角色 0 - 普通用户 1 - 管理员
-	 */
-	private Integer userRole;
+//	/**
+//	 * 用户角色 0 - 普通用户 1 - 管理员
+//	 */
+//	private Integer userRole;
 
 
 	/**
@@ -80,6 +80,12 @@ public class UserVO implements Serializable {
 	 */
 	@ApiModelProperty(value = "是否关注")
 	private Boolean isFollow;
+
+	/**
+	 * 是否关注
+	 */
+	@ApiModelProperty(value = "是否关注")
+	private Boolean isFriend;
 
 	private static final long serialVersionUID = -2643066616918515217L;
 }

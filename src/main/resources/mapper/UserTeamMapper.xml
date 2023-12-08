@@ -6,17 +6,12 @@
 
     <resultMap id="BaseResultMap" type="com.example.studypartner.domain.entity.UserTeam">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="userId" column="userId" jdbcType="BIGINT"/>
-            <result property="teamId" column="teamId" jdbcType="BIGINT"/>
-            <result property="joinTime" column="joinTime" jdbcType="TIMESTAMP"/>
-            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="teamId" column="team_id" jdbcType="BIGINT"/>
+            <result property="joinTime" column="join_time" jdbcType="TIMESTAMP"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="deleted" jdbcType="TINYINT"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,userId,teamId,
-        joinTime,createTime,updateTime,
-        isDelete
-    </sql>
 </mapper>

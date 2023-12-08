@@ -1,6 +1,7 @@
 package com.example.studypartner.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -42,7 +43,9 @@ public class Follow implements Serializable {
     /**
      * 逻辑删除
      */
-	@TableLogic(value = "0",delval = "1")
+	@ApiModelProperty("是否删除 设置逻辑删除")
+	@TableLogic(value = "0", delval = "1")
+	@TableField("deleted")
     private Integer isDelete;
 
     @TableField(exist = false)

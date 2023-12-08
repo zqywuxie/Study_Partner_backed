@@ -186,6 +186,7 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 		return chatMessageVOS;
 	}
 
+	//todo 清空聊天记录
 	@Override
 	public Boolean clearChatRecords(ChatClearRequest chatClearRequest) {
 		return null;
@@ -226,7 +227,7 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 		return chatList.stream().map(chat -> {
 			ChatMessageVO chatMessageVO = chatResult(chat.getFromId(), chat.getContent());
 			boolean isCaptain = userId != null && userId.equals(chat.getFromId());
-			if (userService.getById(chat.getFromId()).getUserRole().equals(ADMIN_ROLE) || isCaptain) {
+			if (isCaptain) {
 				chatMessageVO.setIsAdmin(true);
 			}
 			if (chat.getFromId().equals(loginUser.getId())) {

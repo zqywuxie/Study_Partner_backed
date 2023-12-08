@@ -308,7 +308,7 @@ public class WebSocket {
         chatMessageVO.setChatType(chatType);
         chatMessageVO.setCreateTime(DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
 		// 权限
-        if (user.getId().equals(team.getUserId()) || user.getUserRole().equals(ADMIN_ROLE)) {
+        if (user.getId().equals(team.getUserId()) ) {
             chatMessageVO.setIsAdmin(true);
         }
 		// 判断消息是否为自己发送的
@@ -341,9 +341,10 @@ public class WebSocket {
         chatMessageVO.setText(text);
         chatMessageVO.setChatType(chatType);
         chatMessageVO.setCreateTime(DateUtil.format(new Date(), "yyyy年MM月dd日 HH:mm:ss"));
-        if (Objects.equals(user.getUserRole(), ADMIN_ROLE)) {
-            chatMessageVO.setIsAdmin(true);
-        }
+		//todo admin
+//        if (Objects.equals(user.getUserRole(), ADMIN_ROLE)) {
+//            chatMessageVO.setIsAdmin(true);
+//        }
         User loginUser = (User) this.httpSession.getAttribute(USER_LOGIN_STATUS);
         if (Objects.equals(loginUser.getId(), user.getId())) {
             chatMessageVO.setIsMy(true);

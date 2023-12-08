@@ -40,7 +40,7 @@ public class User implements Serializable {
 	 */
 	@ApiModelProperty("账号")
 
-	private String userAccount;
+	private String useraccount;
 
 	/**
 	 * 用户头像
@@ -59,7 +59,7 @@ public class User implements Serializable {
 	 * 密码
 	 */
 	@ApiModelProperty("密码")
-	private String userPassword;
+	private String password;
 
 	/**
 	 * 邮箱
@@ -71,7 +71,7 @@ public class User implements Serializable {
 	 * 状态 0-正常
 	 */
 	@ApiModelProperty("状态 0-正常")
-	private Integer userStatus;
+	private Integer status;
 
 	/**
 	 * 电话
@@ -103,21 +103,17 @@ public class User implements Serializable {
 	 */
 	@ApiModelProperty("是否删除 设置逻辑删除")
 	@TableLogic(value = "0", delval = "1")
+	@TableField("deleted")
 	private Integer isDelete;
 
-	/**
-	 * 用户权限
-	 * 0 普通用户
-	 * 1 管理员
-	 */
-	@ApiModelProperty("用户权限 0 普通用户 1 管理员")
-	private Integer userRole;
+//	/**
+//	 * 用户权限
+//	 * 0 普通用户
+//	 * 1 管理员
+//	 */
+//	@ApiModelProperty("用户权限 0 普通用户 1 管理员")
+//	private Integer userRole;
 
-	/**
-	 * 用户城市
-	 */
-	@ApiModelProperty("用户城市")
-	private String city;
 
 	/**
 	 * 用户个人简历
@@ -126,13 +122,15 @@ public class User implements Serializable {
 	@ApiModelProperty("用户个人简历")
 	private String profile;
 
+
 	/**
-	 * 用户省
+	 * 部门ID
 	 */
+	private Long deptId;
 
-	@ApiModelProperty("用户省")
-	private String province;
-
+	/**
+	 * 标签
+	 */
 	private String tags;
 
 }

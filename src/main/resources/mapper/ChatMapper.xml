@@ -6,19 +6,15 @@
 
     <resultMap id="BaseResultMap" type="com.example.studypartner.domain.entity.Chat">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="formId" column="formId" jdbcType="BIGINT"/>
-            <result property="toId" column="toId" jdbcType="BIGINT"/>
+            <result property="fromId" column="from_id" jdbcType="BIGINT"/>
+            <result property="toId" column="to_id" jdbcType="BIGINT"/>
             <result property="content" column="content" jdbcType="VARCHAR"/>
-            <result property="chatType" column="chatType" jdbcType="TINYINT"/>
-            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-            <result property="teamId" column="teamId" jdbcType="BIGINT"/>
-            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+            <result property="chatType" column="chat_type" jdbcType="TINYINT"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="teamId" column="team_id" jdbcType="BIGINT"/>
+            <result property="isDelete" column="deleted" jdbcType="TINYINT"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,formId,toId,
-        content,chatType,createTime,
-        updateTime,teamId,isDelete
-    </sql>
+
 </mapper>

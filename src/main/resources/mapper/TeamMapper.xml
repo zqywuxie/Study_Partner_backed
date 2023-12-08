@@ -7,22 +7,17 @@
     <resultMap id="BaseResultMap" type="com.example.studypartner.domain.entity.Team">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="name" column="name" jdbcType="VARCHAR"/>
-        <result property="avatarUrl" column="avatarUrl" jdbcType="VARCHAR"/>
+        <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
         <result property="description" column="description" jdbcType="VARCHAR"/>
-        <result property="maxNum" column="maxNum" jdbcType="INTEGER"/>
-        <result property="expireTime" column="expireTime" jdbcType="TIMESTAMP"/>
-        <result property="userId" column="userId" jdbcType="BIGINT"/>
+        <result property="maxNum" column="max_num" jdbcType="INTEGER"/>
+        <result property="expireTime" column="expire_time" jdbcType="TIMESTAMP"/>
+        <result property="userId" column="user_id" jdbcType="BIGINT"/>
         <result property="status" column="status" jdbcType="INTEGER"/>
         <result property="password" column="password" jdbcType="VARCHAR"/>
-        <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
-        <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-        <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+        <result property="isDelete" column="deleted" jdbcType="TINYINT"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,name,description,
-        maxNum,expireTime,userId,
-        status,password,createTime,
-        updateTime,isDelete
-    </sql>
+
 </mapper>

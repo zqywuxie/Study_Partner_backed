@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class LoginRequest implements Serializable {
     private static final long serialVersionUID = 1140279174545179366L;
     @ApiModelProperty("用户账号")
-    private String userAccount;
+    private String useraccount;
     @ApiModelProperty("用户密码")
-    private String userPassword;
+    private String password;
 }

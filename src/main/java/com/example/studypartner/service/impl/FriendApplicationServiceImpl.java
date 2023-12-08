@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.studypartner.common.ErrorCode;
 import com.example.studypartner.domain.entity.FriendApplication;
@@ -21,6 +22,7 @@ import com.example.studypartner.service.UserService;
 import com.google.gson.Gson;
 
 import com.google.gson.reflect.TypeToken;
+import com.mchange.lang.LongUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
@@ -44,7 +46,7 @@ import static com.example.studypartner.constant.RedissonContents.APPLY_LOCK;
 /**
  * @author wuxie
  * @description 针对表【FriendApplication(好友申请管理表)】的数据库操作Service实现
- * @createDate 2023-06-18 14:10:45
+ * @createDate 2023-11-18 14:10:45
  */
 @Service
 public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationMapper, FriendApplication>
@@ -73,6 +75,7 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 	 * @return
 	 */
 	@Override
+	@Transactional
 	public boolean addFriendRecords(User loginUser, FriendAddRequest friendAddRequest) {
 		Long receiveId = friendAddRequest.getReceiveId();
 		String remark = friendAddRequest.getRemark();
@@ -120,7 +123,7 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 				if (Boolean.TRUE.equals(hasKey)) {
 					redisTemplate.opsForValue().increment(friendApplication);
 				} else {
-					redisTemplate.opsForValue().set(friendApplication, "1");
+					redisTemplate.opsForValue().set(friendApplication, 1);
 				}
 
 
@@ -157,16 +160,43 @@ public class FriendApplicationServiceImpl extends ServiceImpl<FriendApplicationM
 	}
 
 	@Override
+	@Transactional
 	public boolean deleteFriendRecords(User loginUser, Long friendId) {
-		LambdaQueryWrapper<FriendApplication> friendApplicationLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		friendApplicationLambdaQueryWrapper.eq(FriendApplication::getReceiveId, loginUser.getId());
-		friendApplicationLambdaQueryWrapper.eq(FriendApplication::getFromId, friendId);
-		long count = this.count(friendApplicationLambdaQueryWrapper);
-		if (count == 0) {
+		// todo loginUser更新数据后还是原来session里面的
+		User user = userService.getById(loginUser.getId());
+		String friendsIds = user.getFriendsIds();
+		List<Long> friendsList = parseFriendsIds(friendsIds);
+
+		if (!friendsList.contains(friendId)) {
 			throw new ResultException(ErrorCode.NULL_ERROR, "该好友不存在");
 		}
-		return this.remove(friendApplicationLambdaQueryWrapper);
+
+		// Update the current user's friends list
+		updateUserFriendsList(loginUser, friendsList, friendId);
+
+		// Update the friend's friends list
+		User friendUser = userService.getById(friendId);
+		List<Long> friendFriendsList = parseFriendsIds(friendUser.getFriendsIds());
+		friendFriendsList.removeIf(id -> Objects.equals(id, loginUser.getId()));
+		updateUserFriendsList(friendUser, friendFriendsList, loginUser.getId());
+
+		return true;
 	}
+
+	private List<Long> parseFriendsIds(String friendsIds) {
+		return Arrays.stream(friendsIds.substring(1, friendsIds.length() - 1).split(","))
+				.map(String::trim)
+				.map(Long::parseLong)
+				.collect(Collectors.toList());
+	}
+
+	private void updateUserFriendsList(User user, List<Long> friendsList, Long friendId) {
+		friendsList.removeIf(id -> Objects.equals(id, friendId));
+		LambdaUpdateWrapper<User> wrapper = new LambdaUpdateWrapper<>();
+		wrapper.eq(User::getId, user.getId()).set(User::getFriendsIds, friendsList.toString());
+		userService.update(wrapper);
+	}
+
 
 	/**
 	 * 获得好友申请

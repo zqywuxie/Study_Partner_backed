@@ -75,7 +75,9 @@ public class Team implements Serializable {
     /**
      * 是否删除
      */
-	@TableLogic(value = "0",delval = "1")
+	@ApiModelProperty("是否删除 设置逻辑删除")
+	@TableLogic(value = "0", delval = "1")
+	@TableField("deleted")
     private Integer isDelete;
 
     @TableField(exist = false)

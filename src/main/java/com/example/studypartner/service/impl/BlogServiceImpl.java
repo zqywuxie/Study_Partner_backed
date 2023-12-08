@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,7 +35,7 @@ import static com.example.studypartner.constant.SystemConstant.PAGE_SIZE;
 /**
  * @author wuxie
  * @description 针对表【blog】的数据库操作Service实现
- * @createDate 2023-06-03 15:54:34
+ * @createDate 2023-11-03 15:54:34
  */
 @Service
 public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
@@ -58,163 +59,188 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 	@Resource
 	private RedisTemplate stringRedisTemplate;
 
-	@Override
-	public Long addBlog(BlogAddRequest blogAddRequest, User loginUser) {
-		Blog blog = new Blog();
-		ArrayList<String> imageNameList = new ArrayList<>();
-		try {
-			MultipartFile[] images = blogAddRequest.getImages();
-			if (images != null) {
-				for (MultipartFile image : images) {
-					// 上传到阿里云
-					String filename = fileService.uploadFileAvatar(image);
-					imageNameList.add(filename);
-				}
-				String imageStr = StringUtils.join(imageNameList, ",");
-				blog.setImages(imageStr);
-			}
-		} catch (Exception e) {
-			throw new ResultException(ErrorCode.SYSTEM_ERROR, e.getMessage());
-		}
-		blog.setUserId(loginUser.getId());
-		blog.setTitle(blogAddRequest.getTitle());
-		blog.setContent(blogAddRequest.getContent());
-		boolean saved = this.save(blog);
-		if (saved) {
-			List<UserVO> userVOList = followService.listFans(loginUser.getId());
-			if (!userVOList.isEmpty()) {
-				for (UserVO userVO : userVOList) {
-					String key = BLOG_FEED_KEY + userVO.getId();
-					stringRedisTemplate.opsForZSet().add(key, blog.getId().toString(), System.currentTimeMillis());
-					String likeNumKey = MESSAGE_BLOG_NUM_KEY + userVO.getId();
-					Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);
-					if (Boolean.TRUE.equals(hasKey)) {
-						stringRedisTemplate.opsForValue().increment(likeNumKey);
-					} else {
-						stringRedisTemplate.opsForValue().set(likeNumKey, "1");
-					}
-				}
-			}
-		}
-		return blog.getId();
-	}
 
 	@Override
-	public Page<BlogVO> listMyBlogs(long currentPage, Long id) {
+	public Page<BlogVO> listMyBlogs(long currentPage, Long userId) {
 		if (currentPage <= 0) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
 		}
-		LambdaQueryWrapper<Blog> blogLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		blogLambdaQueryWrapper.eq(Blog::getUserId, id);
-		Page<Blog> blogPage = this.page(new Page<>(currentPage, PAGE_SIZE), blogLambdaQueryWrapper);
+
+		Page<Blog> blogPage = this.page(new Page<>(currentPage, PAGE_SIZE),
+				new LambdaQueryWrapper<Blog>().eq(Blog::getUserId, userId));
+
+		List<BlogVO> blogVOList = blogPage.getRecords().stream()
+				.map(blog -> {
+					BlogVO blogVO = new BlogVO();
+					BeanUtils.copyProperties(blog, blogVO);
+					return blogVO;
+				})
+				.peek(blogVO -> {
+					UserVO userVO = getUserVO(blogVO.getUserId());
+					blogVO.setAuthor(userVO);
+				})
+				.peek(blogVO -> {
+					String images = blogVO.getImages();
+					if (images != null) {
+						String[] imgStr = images.split(",");
+						blogVO.setCoverImage(imgStr[0]);
+					}
+				})
+				.collect(Collectors.toList());
+
 		Page<BlogVO> blogVoPage = new Page<>();
 		BeanUtils.copyProperties(blogPage, blogVoPage);
-		List<BlogVO> blogVOList = blogPage.getRecords().stream().map((blog) -> {
-			BlogVO blogVO = new BlogVO();
-			BeanUtils.copyProperties(blog, blogVO);
-			return blogVO;
-		}).collect(Collectors.toList());
-		for (BlogVO blogVO : blogVOList) {
-			User user = userService.getById(blogVO.getUserId());
-			UserVO userVO = new UserVO();
-			BeanUtils.copyProperties(user, userVO);
-			String images = blogVO.getImages();
-			if (images == null) {
-				continue;
-			}
-			String[] imgStr = images.split(",");
-			blogVO.setCoverImage(imgStr[0]);
-			blogVO.setAuthor(userVO);
-		}
 		blogVoPage.setRecords(blogVOList);
 		return blogVoPage;
 	}
 
+	private UserVO getUserVO(Long userId) {
+		User user = userService.getById(userId);
+		UserVO userVO = new UserVO();
+		BeanUtils.copyProperties(user, userVO);
+		return userVO;
+	}
+
+
+	//region 点赞博客
 	@Override
 	public void likeBlog(long blogId, Long userId) {
 		// todo redis实现
 		// todo 分布式锁
+
 		Blog blog = this.getById(blogId);
-		String key = LIKE_COUNT_KEY + userId;
 
 		if (blog == null) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR, "博文不存在");
 		}
+
+		String key = LIKE_COUNT_KEY + userId;
+
 		LambdaQueryWrapper<BlogLike> blogLikeLambdaQueryWrapper = new LambdaQueryWrapper<>();
 		blogLikeLambdaQueryWrapper.eq(BlogLike::getUserId, userId).eq(BlogLike::getBlogId, blogId);
+
 		long isLike = blogLikeService.count(blogLikeLambdaQueryWrapper);
+
 		if (isLike > 0) {
-			blogLikeService.remove(blogLikeLambdaQueryWrapper);
-			int newNum = blog.getLikedNum() - 1;
-			this.update().eq("id", blogId).set("likedNum", newNum).update();
-			stringRedisTemplate.opsForValue().decrement(key);
-
+			handleUnlike(blog, blogId, userId, key);
 		} else {
-			BlogLike blogLike = new BlogLike();
-			blogLike.setBlogId(blogId);
-			blogLike.setUserId(userId);
-			blogLikeService.save(blogLike);
-			int newNum = blog.getLikedNum() + 1;
-			this.update().eq("id", blogId).set("likedNum", newNum).update();
-			stringRedisTemplate.opsForValue().increment(key);
+			handleLike(blog, blogId, userId, key);
+		}
+	}
 
-			// todo 添加点赞消息
-			Message message = new Message();
-			message.setType(MessageTypeEnum.BLOG_LIKE.getValue());
-			message.setFromId(userId);
-			message.setToId(blog.getUserId());
-			message.setData(String.valueOf(blog.getId()));
-			messageService.save(message);
-			String likeNumKey = MESSAGE_LIKE_NUM_KEY + blog.getUserId();
-			Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);
-			if (Boolean.TRUE.equals(hasKey)) {
-				stringRedisTemplate.opsForValue().increment(likeNumKey);
-			} else {
-				stringRedisTemplate.opsForValue().set(likeNumKey, "1");
-			}
+	private void handleUnlike(Blog blog, long blogId, Long userId, String key) {
+		blogLikeService.remove(new LambdaQueryWrapper<BlogLike>().eq(BlogLike::getUserId, userId)
+				.eq(BlogLike::getBlogId, blogId));
+
+		int newNum = blog.getLikedNum() - 1;
+		this.update().eq("id", blogId).set("liked_num", newNum).update();
+		stringRedisTemplate.opsForValue().decrement(key);
+	}
+
+	private void handleLike(Blog blog, long blogId, Long userId, String key) {
+		BlogLike blogLike = new BlogLike();
+		blogLike.setBlogId(blogId);
+		blogLike.setUserId(userId);
+		blogLikeService.save(blogLike);
+
+		int newNum = blog.getLikedNum() + 1;
+		this.update().eq("id", blogId).set("liked_num", newNum).update();
+		stringRedisTemplate.opsForValue().increment(key);
+
+		// todo 添加点赞消息
+		addLikeMessage(userId, blog);
+
+		// 更新被点赞用户的消息计数
+		updateLikeNumKey(blog.getUserId());
+	}
+
+	private void addLikeMessage(Long userId, Blog blog) {
+		Message message = new Message();
+		message.setType(MessageTypeEnum.BLOG_LIKE.getValue());
+		message.setFromId(userId);
+		message.setToId(blog.getUserId());
+		message.setData(String.valueOf(blog.getId()));
+		messageService.save(message);
+	}
+
+	// 更新点赞缓存
+	private void updateLikeNumKey(Long blogUserId) {
+		String likeNumKey = MESSAGE_LIKE_NUM_KEY + blogUserId;
+		Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);
+
+		if (Boolean.TRUE.equals(hasKey)) {
+			stringRedisTemplate.opsForValue().increment(likeNumKey);
+		} else {
+			stringRedisTemplate.opsForValue().set(likeNumKey, 1);
 		}
 	}
 
 
+	//endregion
+
+
+	// region 博客分页
 	@Override
 	public Page<BlogVO> pageBlog(long currentPage, Long userId) {
+		if (currentPage <= 0) {
+			throw new ResultException(ErrorCode.PARAMS_ERROR);
+		}
+
 		LambdaQueryWrapper<Blog> blogLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		blogLambdaQueryWrapper.orderBy(true, false, Blog::getCreateTime);
+		blogLambdaQueryWrapper.orderByDesc(Blog::getCreateTime);
+
 		Page<Blog> blogPage = this.page(new Page<>(currentPage, PAGE_SIZE), blogLambdaQueryWrapper);
+
+		List<BlogVO> blogVOList = blogPage.getRecords().stream()
+				.map(blog -> {
+					BlogVO blogVO = new BlogVO();
+					BeanUtils.copyProperties(blog, blogVO);
+					return blogVO;
+				})
+				.peek(blogVO -> {
+					UserVO userVO = getBlogAuthor(blogVO.getUserId());
+					blogVO.setAuthor(userVO);
+				})
+				.peek(blogVO -> {
+					long count = getBlogLikeCount(blogVO.getId(), userId);
+					blogVO.setIsLike(count > 0);
+				})
+				.collect(Collectors.toList());
+
+		blogVOList.forEach(this::processBlogImages);
+
 		Page<BlogVO> blogVoPage = new Page<>();
 		BeanUtils.copyProperties(blogPage, blogVoPage);
-		List<BlogVO> blogVOList = blogPage.getRecords().stream().map((blog) -> {
-			BlogVO blogVO = new BlogVO();
-			BeanUtils.copyProperties(blog, blogVO);
-			LambdaQueryWrapper<BlogLike> blogLikeLambdaQueryWrapper = new LambdaQueryWrapper<>();
-			LambdaQueryWrapper<User> blogAuthor = new LambdaQueryWrapper<>();
-			blogAuthor.eq(User::getId, blog.getUserId());
-			// todo 优化代码
-			User author = userService.getOne(blogAuthor);
-			if (author == null) {
-				throw new ResultException(ErrorCode.PARAMS_ERROR, "博客没有作者");
-			}
-			UserVO userVO = new UserVO();
-			BeanUtils.copyProperties(author, userVO);
-			blogLikeLambdaQueryWrapper.eq(BlogLike::getBlogId, blog.getId()).eq(BlogLike::getUserId, userId);
-			long count = blogLikeService.count(blogLikeLambdaQueryWrapper);
-			blogVO.setAuthor(userVO);
-			blogVO.setIsLike(count > 0);
-			return blogVO;
-		}).collect(Collectors.toList());
-		for (BlogVO blogVO : blogVOList) {
-			String images = blogVO.getImages();
-			if (images == null) {
-				continue;
-			}
-			String[] imgStrs = images.split(",");
-			blogVO.setCoverImage(imgStrs[0]);
-		}
 		blogVoPage.setRecords(blogVOList);
+
 		return blogVoPage;
 	}
 
+	private UserVO getBlogAuthor(Long userId) {
+		LambdaQueryWrapper<User> blogAuthorQuery = new LambdaQueryWrapper<>();
+		blogAuthorQuery.eq(User::getId, userId);
+		User author = userService.getOne(blogAuthorQuery);
 
+		if (author == null) {
+			throw new ResultException(ErrorCode.PARAMS_ERROR, "博客没有作者");
+		}
+
+		UserVO userVO = new UserVO();
+		BeanUtils.copyProperties(author, userVO);
+		return userVO;
+	}
+
+	private long getBlogLikeCount(long blogId, Long userId) {
+		LambdaQueryWrapper<BlogLike> blogLikeQuery = new LambdaQueryWrapper<>();
+		blogLikeQuery.eq(BlogLike::getBlogId, blogId).eq(BlogLike::getUserId, userId);
+		return blogLikeService.count(blogLikeQuery);
+	}
+
+
+	//endregion
+
+
+	//region 根据id获得博文
 	@Override
 	public BlogVO getBlogById(long blogId) {
 		Blog blog = this.getById(blogId);
@@ -238,36 +264,61 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 	@Override
 	public BlogVO getBlogById(long blogId, Long userId) {
 		Blog blog = this.getById(blogId);
+		if (blog == null) {
+			throw new ResultException(ErrorCode.PARAMS_ERROR, "博文不存在");
+		}
+
 		BlogVO blogVO = new BlogVO();
 		BeanUtils.copyProperties(blog, blogVO);
-		LambdaQueryWrapper<BlogLike> blogLikeLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		blogLikeLambdaQueryWrapper.eq(BlogLike::getUserId, userId);
-		blogLikeLambdaQueryWrapper.eq(BlogLike::getBlogId, blogId);
-		long isLike = blogLikeService.count(blogLikeLambdaQueryWrapper);
-		blogVO.setIsLike(isLike > 0);
-		User author = userService.getById(blog.getUserId());
-		UserVO authorVO = new UserVO();
-		BeanUtils.copyProperties(author, authorVO);
-		LambdaQueryWrapper<Follow> followLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		followLambdaQueryWrapper.eq(Follow::getFollowUserId, authorVO.getId()).eq(Follow::getUserId, userId);
-		long count = followService.count(followLambdaQueryWrapper);
-		authorVO.setIsFollow(count > 0);
+
+		long likeCount = getBlogLikeCount(blogId, userId);
+		blogVO.setIsLike(likeCount > 0);
+
+		UserVO authorVO = getBlogAuthorAndFollowStatus(blog.getUserId(), userId);
 		blogVO.setAuthor(authorVO);
-		String images = blogVO.getImages();
-		if (images == null) {
-			return blogVO;
-		}
-		String[] imgStrs = images.split(",");
-		ArrayList<String> imgStrList = new ArrayList<>();
-		for (String imgStr : imgStrs) {
-			imgStrList.add(imgStr);
-		}
-		String imgStr = StringUtils.join(imgStrList, ",");
-		blogVO.setImages(imgStr);
-		blogVO.setCoverImage(imgStrList.get(0));
+
+		processBlogImages(blogVO);
+
 		return blogVO;
 	}
 
+
+	private UserVO getBlogAuthorAndFollowStatus(Long authorId, Long userId) {
+		User author = userService.getById(authorId);
+		if (author == null) {
+			throw new ResultException(ErrorCode.PARAMS_ERROR, "博客没有作者");
+		}
+
+		UserVO authorVO = new UserVO();
+		BeanUtils.copyProperties(author, authorVO);
+
+		LambdaQueryWrapper<Follow> followQuery = new LambdaQueryWrapper<>();
+		followQuery.eq(Follow::getFollowUserId, authorVO.getId()).eq(Follow::getUserId, userId);
+
+		long followCount = followService.count(followQuery);
+		authorVO.setIsFollow(followCount > 0);
+
+		return authorVO;
+	}
+
+
+	//endregion
+
+
+	// 处理博文的封面
+	private void processBlogImages(BlogVO blogVO) {
+		String images = blogVO.getImages();
+		if (images != null) {
+			String[] imgStrs = images.split(",");
+			ArrayList<String> imgStrList = new ArrayList<>(Arrays.asList(imgStrs));
+			String imgStr = StringUtils.join(imgStrList, ",");
+			blogVO.setImages(imgStr);
+			blogVO.setCoverImage(imgStrList.get(0));
+		}
+	}
+
+
+	// region 博客增删改查
 	@Override
 	public void deleteBlog(Long blogId, Long userId, boolean isAdmin) {
 		if (isAdmin) {
@@ -322,6 +373,50 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 		blog.setContent(blogUpdateRequest.getContent());
 		this.updateById(blog);
 	}
+
+
+	@Override
+	public Long addBlog(BlogAddRequest blogAddRequest, User loginUser) {
+		Blog blog = new Blog();
+		ArrayList<String> imageNameList = new ArrayList<>();
+		try {
+			MultipartFile[] images = blogAddRequest.getImages();
+			if (images != null) {
+				for (MultipartFile image : images) {
+					// 上传到阿里云
+					String filename = fileService.uploadFileAvatar(image);
+					imageNameList.add(filename);
+				}
+				String imageStr = StringUtils.join(imageNameList, ",");
+				blog.setImages(imageStr);
+			}
+		} catch (Exception e) {
+			throw new ResultException(ErrorCode.SYSTEM_ERROR, e.getMessage());
+		}
+		blog.setUserId(loginUser.getId());
+		blog.setTitle(blogAddRequest.getTitle());
+		blog.setContent(blogAddRequest.getContent());
+		boolean saved = this.save(blog);
+		if (saved) {
+			List<UserVO> userVOList = followService.listFans(loginUser.getId());
+			if (!userVOList.isEmpty()) {
+				for (UserVO userVO : userVOList) {
+					String key = BLOG_FEED_KEY + userVO.getId();
+					stringRedisTemplate.opsForZSet().add(key, blog.getId().toString(), System.currentTimeMillis());
+					String likeNumKey = MESSAGE_BLOG_NUM_KEY + userVO.getId();
+					Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);
+					if (Boolean.TRUE.equals(hasKey)) {
+						stringRedisTemplate.opsForValue().increment(likeNumKey);
+					} else {
+						stringRedisTemplate.opsForValue().set(likeNumKey, "1");
+					}
+				}
+			}
+		}
+		return blog.getId();
+	}
+
+	//endregion
 }
 
 

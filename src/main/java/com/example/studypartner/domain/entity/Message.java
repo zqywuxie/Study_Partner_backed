@@ -1,9 +1,7 @@
 package com.example.studypartner.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -61,6 +59,9 @@ public class Message implements Serializable {
     /**
      * 逻辑删除
      */
+	@ApiModelProperty("是否删除 设置逻辑删除")
+	@TableLogic(value = "0", delval = "1")
+	@TableField("deleted")
     private Integer isDelete;
 
     @TableField(exist = false)

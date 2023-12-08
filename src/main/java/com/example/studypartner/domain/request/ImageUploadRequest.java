@@ -3,7 +3,6 @@ package com.example.studypartner.domain.request;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -20,7 +19,7 @@ public class ImageUploadRequest {
 	@ApiModelProperty("图片")
 	MultipartFile file;
 	@ApiModelProperty("账号")
-	String userAccount;
+	String useraccount;
 
 	String type;
 }

@@ -31,7 +31,7 @@ import static com.example.studypartner.constant.RedisConstants.*;
 /**
  * @author Shier
  * @description 针对表【message】的数据库操作Service实现
- * @createDate 2023-06-21 17:39:30
+ * @createDate 2023-11-21 17:39:30
  */
 @Service
 public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
@@ -121,10 +121,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 				messageVO.setBlog(blogVO);
 				messageVO.setComment(commentsVO);
 			}
-			if (item.getType() == MessageTypeEnum.FRIEND_APPLICATION.getValue() || item.getType() == MessageTypeEnum.FOLLOW_NOTIFICATIONS.getValue()) {
-				User fromUser = userService.getById(item.getData());
-				UserVO uservo = new UserVO();
-				BeanUtils.copyProperties(fromUser, uservo);
+			if (item.getType() == MessageTypeEnum.FRIEND_APPLICATION.getValue()) {
 				LambdaQueryWrapper<FriendApplication> queryWrapper = new LambdaQueryWrapper<>();
 				queryWrapper.eq(FriendApplication::getFromId, item.getData()).eq(FriendApplication::getReceiveId, userId);
 				FriendApplication friendApplication = friendApplicationService.getOne(queryWrapper);
@@ -132,10 +129,8 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 				friendsRecordVO.setApplyUser(userVO);
 				friendsRecordVO.setRemark(friendApplication.getRemark());
 				friendsRecordVO.setStatus(friendApplication.getStatus());
-				messageVO.setFromUser(userVO);
 				messageVO.setFriendsRecordVO(friendsRecordVO);
 			}
-
 			return messageVO;
 		}).collect(Collectors.toList());
 	}

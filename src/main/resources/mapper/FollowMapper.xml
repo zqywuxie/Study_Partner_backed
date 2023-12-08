@@ -13,8 +13,5 @@
             <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,user_id,follow_user_id,
-        create_time,update_time,is_delete
-    </sql>
+
 </mapper>

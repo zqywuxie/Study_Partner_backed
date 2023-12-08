@@ -279,7 +279,6 @@ server:
 ![image-20230918190546133](https://wuxie-image.oss-cn-chengdu.aliyuncs.com/2023/09/017/image-20230918190546133.png)
 
 ```nginx
-    # HTTP反向代理相关配置结束 <<<
     location / {
         try_files $uri $uri/ @router;#需要指向下面的@router否则会出现vue的路由在nginx中刷新出现404
         index  index.html index.htm;

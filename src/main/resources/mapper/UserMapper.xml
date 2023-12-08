@@ -7,30 +7,22 @@
     <resultMap id="BaseResultMap" type="com.example.studypartner.domain.entity.User">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="username" column="username" jdbcType="VARCHAR"/>
-            <result property="userAccount" column="userAccount" jdbcType="VARCHAR"/>
-            <result property="avatarUrl" column="avatarUrl" jdbcType="VARCHAR"/>
+            <result property="useraccount" column="useraccount" jdbcType="VARCHAR"/>
+            <result property="avatarUrl" column="avatar_url" jdbcType="VARCHAR"/>
             <result property="gender" column="gender" jdbcType="VARCHAR"/>
-            <result property="friendsIds" column="friendsIds" jdbcType="VARCHAR"/>
-            <result property="userPassword" column="userPassword" jdbcType="VARCHAR"/>
+            <result property="friendsIds" column="friends_ids" jdbcType="VARCHAR"/>
+            <result property="password" column="password" jdbcType="VARCHAR"/>
             <result property="email" column="email" jdbcType="VARCHAR"/>
-            <result property="userStatus" column="userStatus" jdbcType="INTEGER"/>
+            <result property="status" column="status" jdbcType="INTEGER"/>
+            <result property="deptId" column="dept_id" jdbcType="INTEGER"/>
             <result property="phone" column="phone" jdbcType="VARCHAR"/>
-            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
-            <result property="userRole" column="userRole" jdbcType="INTEGER"/>
-            <result property="city" column="city" jdbcType="VARCHAR"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="deleted" jdbcType="TINYINT"/>
+<!--            <result property="userRole" column="user_role" jdbcType="INTEGER"/>-->
             <result property="profile" column="profile" jdbcType="VARCHAR"/>
-            <result property="province" column="province" jdbcType="VARCHAR"/>
             <result property="tags" column="tags" jdbcType="VARCHAR"/>
     </resultMap>
 
-    <sql id="Base_Column_List">
-        id,username,userAccount,
-        avatarUrl,gender,userPassword,
-        email,userStatus,phone,
-        createTime,updateTime,isDelete,
-        userRole,city,profile,
-        province
-    </sql>
+
 </mapper>

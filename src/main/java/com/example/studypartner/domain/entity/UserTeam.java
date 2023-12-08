@@ -1,6 +1,7 @@
 package com.example.studypartner.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.Getter;
 
@@ -50,7 +51,9 @@ public class UserTeam implements Serializable {
     /**
      * 是否删除
      */
-	@TableLogic(value = "0",delval = "1")
+	@ApiModelProperty("是否删除 设置逻辑删除")
+	@TableLogic(value = "0", delval = "1")
+	@TableField("deleted")
 
     private Integer isDelete;
 

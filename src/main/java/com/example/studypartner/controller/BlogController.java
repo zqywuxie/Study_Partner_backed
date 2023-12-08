@@ -66,7 +66,7 @@ public class BlogController {
 	@ApiImplicitParams(
 			{@ApiImplicitParam(name = "currentPage", value = "当前页"),
 					@ApiImplicitParam(name = "request", value = "request请求")})
-	public CommonResult<Page<BlogVO>> listBlogPage(long currentPage, HttpServletRequest request) {
+	public CommonResult<Page<BlogVO>> listBlogPage(@RequestParam Long currentPage, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		return ResultUtils.success(blogService.pageBlog(currentPage, loginUser.getId()));
 	}

@@ -57,11 +57,7 @@ public class UserUpdateRequest implements Serializable {
 	private String phone;
 
 
-	/**
-	 * 用户城市
-	 */
-	@ApiModelProperty("用户城市")
-	private String city;
+
 
 	/**
 	 * 用户个人简历
@@ -70,12 +66,7 @@ public class UserUpdateRequest implements Serializable {
 	@ApiModelProperty("用户个人简历")
 	private String profile;
 
-	/**
-	 * 用户省
-	 */
 
-	@ApiModelProperty("用户省")
-	private String province;
 
 	private String tags;
 

@@ -63,7 +63,7 @@ public class CommentsController {
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN);
 		}
-		// 限流
+		// 限流次数太少了 todo
 		boolean doRateLimit = redisLimiterManager.doRateLimit(loginUser.getId().toString());
 		if (!doRateLimit) {
 			throw new ResultException(ErrorCode.TOO_MANY_REQUEST);
