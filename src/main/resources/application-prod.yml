@@ -7,7 +7,7 @@ spring:
     # 发送者邮箱（根据自己邮箱填写）
     username: 15182852522@163.com
     #  配置密码，注意是开启POP3/SMTP的授权密码(根据自己的授权密码填写)
-    password: NJKSSWOMGMWJYNMD
+    password: xx
 
     properties:
       mail:
@@ -53,7 +53,7 @@ server:
     context-path: /api
     session:
       cookie:
-        domain: zqywuku.top
+        domain: xxxx
         secure: true
   port: 10091
 
@@ -62,6 +62,6 @@ aliyun:
   oss:
     file:
       endpoint: oss-cn-chengdu.aliyuncs.com
-      keyid: LTAI5tJGHkR15HAtpMxfrm9N
-      keysecret: euFVph4QYL92EkGebPwUrWGZeGHgri
-      bucketname: wuxie-image
+      keyid: xxxx
+      keysecret: xxxx
+      bucketname: xxxx
