@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
  */
 
 @Data
-@ApiModel(value = "图片上传请求")
 public class ImageUploadRequest {
 
 	@ApiModelProperty("图片")

@@ -3,6 +3,7 @@ package com.example.studypartner.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.common.ErrorCode;
+import com.example.studypartner.domain.dto.BlogDTO;
 import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.request.BlogAddRequest;
 import com.example.studypartner.domain.request.BlogUpdateRequest;
@@ -12,9 +13,6 @@ import com.example.studypartner.manager.RedisLimiterManager;
 import com.example.studypartner.service.BlogService;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.ResultUtils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +28,6 @@ import javax.servlet.http.HttpServletRequest;
  */
 @RestController
 @RequestMapping("/blog")
-@Api(tags = "博文管理模块")
 public class BlogController {
 	/**
 	 * 博客服务
@@ -54,35 +51,25 @@ public class BlogController {
 //    private BloomFilter bloomFilter;
 
 	/**
-	 * 博客列表
-	 *
-	 * @param currentPage
+	 * @param blogDTO
 	 * @param request
 	 * @return
 	 */
-
-	@GetMapping("/list")
-	@ApiOperation(value = "获取博文")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "currentPage", value = "当前页"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
-	public CommonResult<Page<BlogVO>> listBlogPage(@RequestParam Long currentPage, HttpServletRequest request) {
+	@PostMapping("/list")
+	@ApiOperation("博客列表")
+	public CommonResult<Page<BlogVO>> listBlogPage(@RequestBody BlogDTO blogDTO, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
-		return ResultUtils.success(blogService.pageBlog(currentPage, loginUser.getId()));
+		return ResultUtils.success(blogService.pageBlog(blogDTO, loginUser.getId()));
 	}
 
+
 	/**
-	 * 添加博客
-	 *
-	 * @param blogAddRequest 博客添加请求
-	 * @param request        请求
-	 * @return {@link BaseResponse}<{@link String}>
+	 * @param blogAddRequest
+	 * @param request
+	 * @return
 	 */
 	@PostMapping("/add")
-	@ApiOperation(value = "添加博文")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "blogAddRequest", value = "博文添加请求"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+	@ApiOperation("添加博客")
 	public CommonResult<String> addBlog(BlogAddRequest blogAddRequest, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -102,17 +89,14 @@ public class BlogController {
 	}
 
 	/**
-	 * 我博客列表
+	 * 个人博文列表
 	 *
-	 * @param currentPage 当前页面
-	 * @param request     请求
-	 * @return {@link BaseResponse}<{@link Page}<{@link BlogVO}>>
+	 * @param currentPage
+	 * @param request
+	 * @return
 	 */
 	@GetMapping("/list/my/blog")
-	@ApiOperation(value = "获取我写的博文")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "currentPage", value = "当前页"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+	@ApiOperation("我的博客")
 	public CommonResult<Page<BlogVO>> listMyBlogs(long currentPage, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -123,17 +107,14 @@ public class BlogController {
 	}
 
 	/**
-	 * 像博客
+	 * 点赞博客
 	 *
 	 * @param id      id
 	 * @param request 请求
-	 * @return {@link BaseResponse}<{@link String}>
+	 * @return {@link CommonResult}<{@link String}>
 	 */
 	@PutMapping("/like/{id}")
-	@ApiOperation(value = "点赞博文")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "id", value = "博文id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+	@ApiOperation("点赞博客")
 	public CommonResult<String> likeBlog(@PathVariable long id, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -146,16 +127,13 @@ public class BlogController {
 	/**
 	 * 通过id获取博客
 	 *
-	 * @param id      id
+	 * @param blogId  id
 	 * @param request 请求
 	 * @return {@link CommonResult}<{@link BlogVO}>
 	 */
-	@GetMapping("/{id}")
-	@ApiOperation(value = "根据id获取博文")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "id", value = "博文id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
-	public CommonResult<BlogVO> getBlogById(@PathVariable Long id, HttpServletRequest request) {
+	@GetMapping("/{blogId}")
+	@ApiOperation("通过id获取博客")
+	public CommonResult<BlogVO> getBlogById(@PathVariable Long blogId, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN);
@@ -164,10 +142,10 @@ public class BlogController {
 //        if (!contains){
 //            return ResultUtils.success(null);
 //        }
-		if (id == null) {
+		if (blogId == null) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
 		}
-		return ResultUtils.success(blogService.getBlogById(id, loginUser.getId()));
+		return ResultUtils.success(blogService.getBlogById(blogId, loginUser.getId()));
 	}
 
 	/**
@@ -178,10 +156,7 @@ public class BlogController {
 	 * @return {@link CommonResult}<{@link String}>
 	 */
 	@DeleteMapping("/{id}")
-	@ApiOperation(value = "根据id删除博文")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "id", value = "博文id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+	@ApiOperation("通过id删除博客")
 	public CommonResult<String> deleteBlogById(@PathVariable Long id, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -203,10 +178,7 @@ public class BlogController {
 	 * @return {@link CommonResult}<{@link String}>
 	 */
 	@PutMapping("/update")
-	@ApiOperation(value = "更新博文")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "blogUpdateRequest", value = "博文更新请求"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+	@ApiOperation("更新博客")
 	public CommonResult<String> updateBlog(BlogUpdateRequest blogUpdateRequest, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {

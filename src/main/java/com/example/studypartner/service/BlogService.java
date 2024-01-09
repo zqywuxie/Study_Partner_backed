@@ -2,6 +2,8 @@ package com.example.studypartner.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.studypartner.common.PageRequest;
+import com.example.studypartner.domain.dto.BlogDTO;
 import com.example.studypartner.domain.entity.Blog;
 import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.request.BlogAddRequest;
@@ -21,9 +23,10 @@ public interface BlogService extends IService<Blog> {
 
 	void likeBlog(long blogId, Long userId);
 
-	Page<BlogVO> pageBlog(long currentPage, Long id);
+	Page<BlogVO> pageBlog(BlogDTO blogDTO, Long id);
 
 	BlogVO getBlogById(long blogId, Long userId);
+
 	BlogVO getBlogById(long blogId);
 
 	void deleteBlog(Long blogId, Long userId, boolean isAdmin);

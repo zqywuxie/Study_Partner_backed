@@ -30,7 +30,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/follow")
-@Api(tags = "关注管理模块")
 public class FollowController {
 	/**
 	 * 关注服务
@@ -60,9 +59,7 @@ public class FollowController {
 	 */
 	@PostMapping("/{followerId}")
 	@ApiOperation(value = "关注用户")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "id", value = "关注用户id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<String> followUser(@PathVariable Long followerId, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -89,8 +86,7 @@ public class FollowController {
 
 	@GetMapping("/fans")
 	@ApiOperation(value = "获取粉丝")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<List<UserVO>> listFans(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -102,8 +98,7 @@ public class FollowController {
 
 	@GetMapping("/fansCount")
 	@ApiOperation(value = "获取粉丝数量")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Integer> fansCount(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -114,8 +109,7 @@ public class FollowController {
 
 	@GetMapping("/myCount")
 	@ApiOperation(value = "我关注数")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Integer> myFollowCount(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -132,8 +126,7 @@ public class FollowController {
 	 */
 	@GetMapping("/my")
 	@ApiOperation(value = "获取我关注的用户")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<List<UserVO>> listMyFollow(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {

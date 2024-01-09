@@ -14,7 +14,6 @@ import java.util.Date;
  * @date 2023/06/22
  */
 @Data
-@ApiModel(value = "好友记录返回")
 public class FriendsRecordVO implements Serializable {
 	private static final long serialVersionUID = 1928465648232335L;
 

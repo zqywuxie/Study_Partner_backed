@@ -31,7 +31,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/message")
-@Api(tags = "消息管理模块")
 public class MessageController {
 
 	/**
@@ -57,8 +56,7 @@ public class MessageController {
 	 */
 	@GetMapping("/num/{type}")
 	@ApiOperation(value = "获得消息数量")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "type", value = "数据类型"), @ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Long> getUserMessageNum(@PathVariable("type") String type, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -70,8 +68,7 @@ public class MessageController {
 
 	@GetMapping("/read/{type}")
 	@ApiOperation(value = "消息已读")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "type", value = "数据类型"), @ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Boolean> readMessage(@PathVariable("type") String type, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -90,9 +87,7 @@ public class MessageController {
 	 */
 	@GetMapping("/get/{type}")
 	@ApiOperation(value = "获取通知消息")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "type", value = "消息类型"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<List<MessageVO>> getUserBlogMessage(@PathVariable("type") String type, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {

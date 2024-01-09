@@ -13,7 +13,6 @@ import java.io.Serializable;
  * @date 2023/06/22
  */
 @Data
-@ApiModel(value = "websocket返回")
 public class WebSocketVO implements Serializable {
 
     private static final long serialVersionUID = 4696612253320170315L;

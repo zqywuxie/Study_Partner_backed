@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.studypartner.common.ErrorCode;
+import com.example.studypartner.domain.dto.UserDTO;
 import com.example.studypartner.domain.entity.Follow;
 import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.enums.RegisterStatus;
@@ -134,8 +135,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 			return RegisterStatus.PASSWORD_CHECK.getText();
 		}
 
+		String specialCharPattern = "[!@#$%^&*()_+-=\\[\\]{};':\"\\\\|,.<>/?\\s]";
 		// 账号不能包含特殊符号
-		if (StringUtils.containsAny(useraccount, "`~!@#$%^&*()+=|{}':;',\\[].<>/?~！@#￥%……&*（）——+|{}&#8203;``【oaicite:0】``&#8203;‘；：”“’。，、？")) {
+		if (StringUtils.containsAny(useraccount, specialCharPattern)) {
 			return RegisterStatus.ACCOUNT_PARAMS.getText();
 		}
 
@@ -297,14 +299,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
 	// region 更新查找方法
 	@Override
-	public List<User> searchUserByName(String username) {
-		QueryWrapper<User> userQueryWrapper = new QueryWrapper<>();
+	public Page<User> searchByText(UserDTO userDTO) {
+		int pageSize = userDTO.getPageSize();
+		int pageNum = userDTO.getPageNum();
 
-		if (StringUtils.isNotBlank(username)) {
-			userQueryWrapper.like("username", username);
-		}
+		String searchText = userDTO.getSearchText();
+		LambdaQueryWrapper<User> userQueryWrapper = new LambdaQueryWrapper<>();
+		userQueryWrapper.like(User::getUsername, searchText)
+				.or(u -> u.like(User::getProfile, searchText))
+				.or(u -> u.like(User::getTags, searchText));
 		List<User> list = this.list(userQueryWrapper);
-		return list.stream().map(this::cleanUser).collect(Collectors.toList());
+		Page<User> page = this.page(new Page<>(pageNum, pageSize), userQueryWrapper);
+		List<User> cleanList = list.stream().map(this::cleanUser).collect(Collectors.toList());
+		page.setRecords(cleanList);
+		return page;
 	}
 
 	/**
@@ -546,7 +554,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
 		try {
 			// 设置缓存，并指定过期时间
-			valueOperations.set(redisKey, page, 30000, TimeUnit.SECONDS);
+			valueOperations.set(redisKey, page, 300, TimeUnit.SECONDS);
 		} catch (Exception e) {
 			log.error("Redis set key-value error", e);
 		}

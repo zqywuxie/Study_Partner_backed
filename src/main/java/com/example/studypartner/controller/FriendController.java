@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/friends")
-@Api(tags = "好友管理模块")
 public class FriendController {
 	/**
 	 * 好友服务
@@ -58,9 +57,7 @@ public class FriendController {
 	 */
 	@PostMapping("/add")
 	@ApiOperation(value = "添加好友")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "friendAddRequest", value = "好友添加请求"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Boolean> addFriendRecords(@RequestBody FriendAddRequest friendAddRequest, HttpServletRequest request) {
 		if (friendAddRequest == null) {
 			throw new ResultException(ErrorCode.NULL_ERROR, "请求参数有误");
@@ -80,9 +77,7 @@ public class FriendController {
 	 */
 	@GetMapping("/delete/{friendId}")
 	@ApiOperation(value = "删除好友")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "friendId", value = "删除好友id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+
 		public CommonResult<Boolean> deleteFriendRecords(@PathVariable Long friendId, HttpServletRequest request) {
 		if (friendId == null) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR, "请求参数为空");
@@ -101,8 +96,7 @@ public class FriendController {
 	 */
 	@GetMapping("/getRecords")
 	@ApiOperation(value = "查询记录")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<List<FriendsRecordVO>> getRecords(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -120,8 +114,7 @@ public class FriendController {
 	 */
 	@GetMapping("/getUnreadCount")
 	@ApiOperation(value = "查询记录")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Integer> getRecordCount(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		int recordCount = friendApplicationService.obtainTheNumberOfUnreadRecords(loginUser);
@@ -136,8 +129,7 @@ public class FriendController {
 	 */
 	@GetMapping("/getMyRecords")
 	@ApiOperation(value = "获取我申请的记录")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<List<FriendsRecordVO>> getMyRecords(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		List<FriendsRecordVO> myFriendApplicationList = friendApplicationService.obtainTheRecordOfMyApplication(loginUser);
@@ -152,8 +144,7 @@ public class FriendController {
 	 */
 	@GetMapping("/my/list")
 	@ApiOperation(value = "通过用户名搜索用户")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<List<UserVO>> getMyFriendList(HttpServletRequest request) {
 		//todo redis存储的数据没有变动 后期优化
 		User loginUser = userService.getById(userService.getLoginUser(request).getId());
@@ -195,9 +186,7 @@ public class FriendController {
 	 */
 	@PostMapping("/agree/{fromId}")
 	@ApiOperation(value = "同意申请")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "fromId", value = "申请id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Boolean> agreeToApply(@PathVariable("fromId") Long fromId, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		boolean agreeToApplyStatus = friendApplicationService.agreeToApply(loginUser, fromId);
@@ -213,9 +202,7 @@ public class FriendController {
 	 */
 	@PostMapping("/canceledApply/{id}")
 	@ApiOperation(value = "取消申请")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "id", value = "申请id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Boolean> canceledApply(@PathVariable("id") Long id, HttpServletRequest request) {
 		if (id == null) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR, "请求有误");
@@ -234,9 +221,7 @@ public class FriendController {
 	 */
 	@GetMapping("/read")
 	@ApiOperation(value = "阅读")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "ids", value = "申请id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Boolean> toRead(@RequestParam(required = false) Set<Long> ids, HttpServletRequest request) {
 		if (CollectionUtils.isEmpty(ids)) {
 			return ResultUtils.success(false);

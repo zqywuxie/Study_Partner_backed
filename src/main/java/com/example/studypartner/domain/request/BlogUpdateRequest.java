@@ -14,7 +14,6 @@ import java.io.Serializable;
  * @date 2023/06/22
  */
 @Data
-@ApiModel(value = "更新博文请求")
 public class BlogUpdateRequest implements Serializable {
     /**
      * 串行版本uid

@@ -17,7 +17,6 @@ import java.util.Date;
  * @author wuxie
  * @TableName user
  */
-@ApiModel(description = "用户表")
 @Data
 public class UserUpdateRequest implements Serializable {
 

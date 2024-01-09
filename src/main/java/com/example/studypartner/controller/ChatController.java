@@ -30,7 +30,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/chat")
-@Api(tags = "聊天管理模块")
 public class ChatController {
 	/**
 	 * 聊天服务
@@ -53,9 +52,6 @@ public class ChatController {
 	 */
 	@PostMapping("/privateChat")
 	@ApiOperation(value = "获取私聊")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "chatRequest", value = "聊天请求"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<List<ChatMessageVO>> getPrivateChat(@RequestBody ChatRequest chatRequest, HttpServletRequest request) {
 		if (chatRequest == null) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
@@ -79,8 +75,6 @@ public class ChatController {
 
 	@GetMapping("/privateUser")
 	@ApiOperation(value = "获取私聊用户")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<List<UserVO>> getPrivateUser(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -99,9 +93,6 @@ public class ChatController {
 	 */
 	@PostMapping("/teamChat")
 	@ApiOperation(value = "获取队伍聊天")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "chatRequest", value = "聊天请求"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<List<ChatMessageVO>> getTeamChat(@RequestBody ChatRequest chatRequest, HttpServletRequest request) {
 		if (chatRequest == null) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR, "请求有误");
@@ -122,8 +113,6 @@ public class ChatController {
 	 */
 	@GetMapping("/hallChat")
 	@ApiOperation(value = "获取大厅聊天")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<List<ChatMessageVO>> getHallChat(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {

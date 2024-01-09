@@ -10,9 +10,6 @@ import com.example.studypartner.manager.RedisLimiterManager;
 import com.example.studypartner.service.CommentsService;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.ResultUtils;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +26,6 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/comments")
-@Api(tags = "博文评论管理模块")
 public class CommentsController {
 	/**
 	 * 博客评论服务
@@ -55,9 +51,6 @@ public class CommentsController {
 	 */
 	@PostMapping("/add")
 	@ApiOperation(value = "添加评论")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "commentsAddRequest", value = "博文评论添加请求"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<String> addComment(@RequestBody CommentsAddRequest commentsAddRequest, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -84,16 +77,14 @@ public class CommentsController {
 	 */
 	@GetMapping
 	@ApiOperation(value = "根据id获取博文评论")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "blogId", value = "博文id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
+//	todo 优化page
 	public CommonResult<List<CommentsVO>> listBlogComments(@RequestParam long blogId, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN);
 		}
-		List<CommentsVO> CommentsVOList = commentsService.listComments(blogId, loginUser.getId());
-		return ResultUtils.success(CommentsVOList);
+		List<CommentsVO> commentsVOS = commentsService.listComments(blogId, loginUser.getId());
+		return ResultUtils.success(commentsVOS);
 	}
 
 	/**
@@ -105,9 +96,6 @@ public class CommentsController {
 	 */
 	@PutMapping("/like/{id}")
 	@ApiOperation(value = "点赞博文评论")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "id", value = "博文评论id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<String> likeComment(@PathVariable Long id, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -126,9 +114,6 @@ public class CommentsController {
 	 */
 	@GetMapping("/{id}")
 	@ApiOperation(value = "根据id获取评论")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "id", value = "博文评论id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<CommentsVO> getCommentById(@PathVariable Long id, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -147,9 +132,6 @@ public class CommentsController {
 	 */
 	@DeleteMapping("/{id}")
 	@ApiOperation(value = "根据id删除评论")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "id", value = "博文评论id"),
-					@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<String> deleteBlogComment(@PathVariable Long id, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
@@ -167,8 +149,6 @@ public class CommentsController {
 	 */
 	@GetMapping("/list/my")
 	@ApiOperation(value = "获取我的评论")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
 	public CommonResult<List<CommentsVO>> listMyBlogComments(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {

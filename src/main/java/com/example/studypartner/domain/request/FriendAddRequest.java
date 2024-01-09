@@ -13,7 +13,6 @@ import java.io.Serializable;
  * @date 2023/06/22
  */
 @Data
-@ApiModel(value = "好友添加请求")
 public class FriendAddRequest implements Serializable {
     /**
      * 串行版本uid

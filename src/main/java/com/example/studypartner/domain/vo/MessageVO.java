@@ -15,7 +15,6 @@ import org.springframework.beans.BeanUtils;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@ApiModel(value = "消息返回")
 public class MessageVO extends Message {
 	/**
 	 * 串行版本uid

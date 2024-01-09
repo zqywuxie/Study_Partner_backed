@@ -13,7 +13,6 @@ import java.io.Serializable;
  * @date 2023/06/19
  */
 @Data
-@ApiModel(value = "消息请求")
 public class MessageRequest implements Serializable {
     /**
      * 串行版本uid

@@ -30,7 +30,6 @@ import static com.example.studypartner.constant.EmailConstant.CAPTCHA_CACHE_KEY;
  * @description
  */
 @RestController
-@Api(description = "短信验证码")
 @RequestMapping("/mail")
 @Slf4j
 public class MailController {

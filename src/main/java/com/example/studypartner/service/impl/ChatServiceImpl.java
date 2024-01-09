@@ -76,6 +76,7 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 				).eq(Chat::getChatType, chatType);
 		// 两方共有聊天
 		List<Chat> list = this.list(chatLambdaQueryWrapper);
+
 		List<ChatMessageVO> chatMessageVOS = list.stream().map(chat -> {
 			ChatMessageVO chatMessageVO = chatResult(loginUser.getId(), toId, chat.getContent(), chatType, chat.getCreateTime());
 			if (chat.getFromId().equals(loginUser.getId())) {
@@ -158,7 +159,7 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 			throw new ResultException(ErrorCode.PARAMS_ERROR, "请求有误");
 		}
 		List<ChatMessageVO> chatRecords = getCache(CACHE_CHAT_TEAM, String.valueOf(teamId));
-		if (chatRecords != null) {
+		if (!chatRecords.isEmpty()) {
 			List<ChatMessageVO> chatMessageVOS = checkIsMyMessage(loginUser, chatRecords);
 			saveCache(CACHE_CHAT_TEAM, String.valueOf(teamId), chatMessageVOS);
 			return chatMessageVOS;

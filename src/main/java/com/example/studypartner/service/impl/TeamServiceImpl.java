@@ -1,6 +1,8 @@
 package com.example.studypartner.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.studypartner.common.ErrorCode;
 import com.example.studypartner.domain.entity.Team;
@@ -18,6 +20,7 @@ import com.example.studypartner.mapper.TeamMapper;
 import com.example.studypartner.service.TeamService;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.service.UserTeamService;
+import com.example.studypartner.utils.ResultUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -28,10 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -304,15 +305,24 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 			if (StringUtils.isNotBlank(name)) {
 				teamQueryWrapper.eq("name", name);
 			}
-			// 判断是否为管理员，非管理员只能查询状态为 PUBLIC 的队伍
+			//查看队伍的类型
 			Integer status = teamDTO.getStatus();
-			if (status == null) {
-				status = 0;
+			List<Long> list = Arrays.asList(0L, 1L, 2L);
+			TeamStatus teamStatus = null;
+			if (isAdmin) {
+				teamQueryWrapper.in("status", list);
+			} else {
+				if (status == null) {
+					status = 0;
+				}
+				teamStatus = TeamStatus.getTeamStatus(status);
+				if (teamStatus == null) {
+					teamStatus = TeamStatus.PUBLIC;
+				}
+				teamQueryWrapper.eq("status", teamStatus.getValue());
 			}
-			TeamStatus teamStatus = TeamStatus.getTeamStatus(status);
-			if (teamStatus == null) {
-				teamStatus = TeamStatus.PUBLIC;
-			}
+
+
 			Integer maxNum = teamDTO.getMaxNum();
 			if (maxNum != null && maxNum <= 5) {
 				teamQueryWrapper.eq("max_num", maxNum);
@@ -327,14 +337,18 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 			if (StringUtils.isNotBlank(searchText)) {
 				teamQueryWrapper.and(tq -> tq.like("name", searchText).or().like("description", searchText));
 			}
+
+
 			List<Long> idList = teamDTO.getIdList();
 			if (!CollectionUtils.isEmpty(idList)) {
 				teamQueryWrapper.in("id", idList);
 			}
-			if (!isAdmin && teamStatus != TeamStatus.PUBLIC) {
-				throw new ResultException(ErrorCode.NOT_ADMIN);
-			}
-			teamQueryWrapper.eq("status", teamStatus.getValue());
+
+//todo  ?
+//			if (!isAdmin && teamStatus != TeamStatus.PUBLIC) {
+//				throw new ResultException(ErrorCode.NOT_ADMIN);
+//			}
+
 
 		}
 
@@ -554,6 +568,101 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 		return teamUserVo;
 	}
 
+	//左外连接
+
+	@Override
+	public List<TeamUserVO> myJoinTeams(TeamDTO teamDTO, Long loginUserId) {
+		// 从数据库中获取Team数据
+		LambdaQueryWrapper<Team> teamQuery = new LambdaQueryWrapper<Team>().eq(Team::getUserId, loginUserId);
+		List<Team> teams = this.list(teamQuery);
+
+		// 从数据库中获取UserTeam数据
+		LambdaQueryWrapper<UserTeam> userTeamsQuery = new LambdaQueryWrapper<UserTeam>().eq(UserTeam::getUserId, loginUserId);
+		List<UserTeam> userTeams = userTeamService.list(userTeamsQuery);
+
+		// 创建一个Set来存储Team的id和user_id，以便快速查找
+		Set<Long> teamIds = teams.stream()
+				.map(Team::getId) // 获取Team的id
+				.collect(Collectors.toSet());
+		Set<Long> teamUserIds = teams.stream()
+				.map(team -> team.getUserId()) // 获取Team的user_id
+				.collect(Collectors.toSet());
+
+		// 使用Java 8的流API过滤掉满足特定条件的userTeams条目
+		List<Long> filteredUserTeams = userTeams.stream()
+				.filter(userTeam -> !teamIds.contains(userTeam.getTeamId()) && // 检查team_id是否存在于Team的id集合中
+						!teamUserIds.contains(userTeam.getUserId())) // 检查user_id是否存在于Team的user_id集合中
+				.map(UserTeam::getTeamId).collect(Collectors.toList()); // 将过滤后的结果收集到一个新的列表中
+
+		if (filteredUserTeams.isEmpty()) {
+			return null;
+		}
+		teamDTO.setIdList(filteredUserTeams);
+		List<TeamUserVO> teamUserVOS = this.listTeams(teamDTO, true);
+		return teamUserVOS;
+	}
+
+	@Override
+	public List<TeamUserVO> myCreateTeams(TeamDTO teamDTO, Long loginUserId) {
+		LambdaQueryWrapper<Team> select = new LambdaQueryWrapper<Team>().eq(Team::getUserId, loginUserId).select(Team::getId);
+		List<Long> idList = this.list(select).stream().map(Team::getId).collect(Collectors.toList());
+		teamDTO.setIdList(idList);
+		List<TeamUserVO> teams = this.listTeams(teamDTO, true);
+		queryTeamCount(loginUserId, teams);
+		return teams;
+	}
+
+	@Override
+	public Page<TeamUserVO> searchAllByPage(TeamDTO teamDTO, Long loginUserId) {
+		teamDTO.setUserId(loginUserId);
+		List<TeamUserVO> teams = this.listTeams(teamDTO, false);
+		this.queryTeamCount(loginUserId, teams);
+		Page<TeamUserVO> teamUserVOPage = new Page<>(teamDTO.getPageNum(), teamDTO.getPageSize());
+		teamUserVOPage.setRecords(teams);
+		return teamUserVOPage;
+	}
+
+
+	/**
+	 * 填充队伍人数字段
+	 *
+	 * @param request
+	 * @param teamList
+	 */
+	private void queryTeamCount(Long loginUserId, List<TeamUserVO> teamList) {
+		//条件查询出的队伍列表
+		List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).collect(Collectors.toList());
+		QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+		try {
+			userTeamQueryWrapper.eq("user_id", loginUserId);
+			userTeamQueryWrapper.in("team_id", teamIdList);
+			//已加入队伍集合
+			List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+			//已加入的队伍的id集合
+			Set<Long> hasJoinTeamIdList = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+			teamList.forEach(team -> {
+				boolean hasJoin = hasJoinTeamIdList.contains(team.getId());
+				team.setHasJoin(hasJoin);
+			});
+		} catch (Exception e) {
+		}
+
+		List<UserTeam> userTeamJoinList = new ArrayList<>();
+		if (!com.baomidou.mybatisplus.core.toolkit.CollectionUtils.isEmpty(teamIdList)) {
+			QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
+			userTeamJoinQueryWrapper.in("team_id", teamIdList);
+			userTeamJoinList = userTeamService.list(userTeamJoinQueryWrapper);
+		}
+
+		//按每个队伍Id分组
+		Map<Long, List<UserTeam>> teamIdUserTeamList = userTeamJoinList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+
+		teamList.forEach(team -> {
+			team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(), new ArrayList<>()).size());
+		});
+	}
+
+
 	private void validateTeamId(long id) {
 		if (id <= 0) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR, "队伍ID不合法");
@@ -594,7 +703,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 			throw new ResultException(ErrorCode.NOT_ADMIN, "无权限");
 		}
 	}
-
 
 
 }

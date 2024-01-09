@@ -22,7 +22,6 @@ import java.util.concurrent.TimeUnit;
 import static com.example.studypartner.constant.RedisConstants.AVATAR_UPDATE_KEY;
 import static com.example.studypartner.constant.RedisConstants.AVATAR_UPDATE_TTL;
 
-@Api(description = "阿里云文件管理")
 @RestController
 @RequestMapping("/fileOss")
 public class OssController {

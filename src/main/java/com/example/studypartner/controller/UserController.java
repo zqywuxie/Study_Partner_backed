@@ -1,18 +1,17 @@
 package com.example.studypartner.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.studypartner.common.CommonResult;
 import com.example.studypartner.common.ErrorCode;
 import com.example.studypartner.constant.RedisConstants;
+import com.example.studypartner.domain.dto.UserDTO;
 import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.request.*;
 import com.example.studypartner.domain.vo.UserVO;
 import com.example.studypartner.exception.ResultException;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.ResultUtils;
-import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
@@ -21,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,11 +28,8 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.server.PathParam;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import static com.example.studypartner.constant.EmailConstant.CAPTCHA_CACHE_KEY;
-import static com.example.studypartner.constant.RedisConstants.USER_RECOMMEND_KEY;
 import static com.example.studypartner.constant.UserConstant.USER_LOGIN_STATUS;
 
 /**
@@ -43,7 +38,6 @@ import static com.example.studypartner.constant.UserConstant.USER_LOGIN_STATUS;
  */
 
 
-@Api(value = "/user", tags = {"用户数据接口"})
 @RestController
 @RequestMapping("/user")
 @CrossOrigin(origins = {"https://www.zqywuku.top/"}, allowCredentials = "true")
@@ -233,20 +227,17 @@ public class UserController {
 	}
 
 	/**
-	 * 根据用户名查询
+	 * 根据用户名，简介，标签查询
 	 * 管理接口
 	 *
-	 * @param username
+	 * @param searchText
 	 * @param request
 	 * @return
 	 */
 
-	@GetMapping("/search")
-	public CommonResult<List<User>> searchUserByName(String username, HttpServletRequest request) {
-		if (!userService.isAdmin(request)) {
-			throw new ResultException(ErrorCode.NOT_ADMIN);
-		}
-		return ResultUtils.success(userService.searchUserByName(username));
+	@GetMapping("/searchByText")
+	public CommonResult<Page<User>> searchByText(@RequestBody UserDTO userDTO, HttpServletRequest request) {
+		return ResultUtils.success(userService.searchByText(userDTO));
 	}
 
 	/**

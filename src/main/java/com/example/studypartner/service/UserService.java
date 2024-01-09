@@ -2,10 +2,10 @@ package com.example.studypartner.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.studypartner.domain.dto.UserDTO;
 import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.request.RegisterRequest;
 import com.example.studypartner.domain.vo.UserVO;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -96,7 +96,7 @@ public interface UserService extends IService<User> {
 	void updatePassword(String phone, String password);
 
 
-	List<User> searchUserByName(String name);
+	Page<User> searchByText(UserDTO userDTO);
 
 	Page<User> recommend(Long pageSize, Long currentPage,Long userId);
 }

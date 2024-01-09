@@ -35,7 +35,6 @@ import static com.example.studypartner.constant.RedisConstants.LIKE_COUNT_KEY;
  * @description
  */
 @RestController
-@Api(description = "点赞")
 @RequestMapping("/like")
 @Slf4j
 public class LikeController {
@@ -60,8 +59,7 @@ public class LikeController {
 
 	@GetMapping("/count")
 	@ApiOperation(value = "点赞数")
-	@ApiImplicitParams(
-			{@ApiImplicitParam(name = "request", value = "request请求")})
+
 	public CommonResult<Integer> getCaptcha(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {

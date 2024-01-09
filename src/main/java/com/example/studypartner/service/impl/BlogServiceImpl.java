@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.example.studypartner.common.ErrorCode;
+import com.example.studypartner.common.PageRequest;
+import com.example.studypartner.domain.dto.BlogDTO;
 import com.example.studypartner.domain.entity.*;
 import com.example.studypartner.domain.enums.MessageTypeEnum;
 import com.example.studypartner.domain.request.BlogAddRequest;
@@ -38,8 +40,7 @@ import static com.example.studypartner.constant.SystemConstant.PAGE_SIZE;
  * @createDate 2023-11-03 15:54:34
  */
 @Service
-public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
-		implements BlogService {
+public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements BlogService {
 
 	@Resource
 	private BloglikeService blogLikeService;
@@ -66,27 +67,22 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
 		}
 
-		Page<Blog> blogPage = this.page(new Page<>(currentPage, PAGE_SIZE),
-				new LambdaQueryWrapper<Blog>().eq(Blog::getUserId, userId));
+		Page<Blog> blogPage = this.page(new Page<>(currentPage, PAGE_SIZE), new LambdaQueryWrapper<Blog>().eq(Blog::getUserId, userId));
 
-		List<BlogVO> blogVOList = blogPage.getRecords().stream()
-				.map(blog -> {
-					BlogVO blogVO = new BlogVO();
-					BeanUtils.copyProperties(blog, blogVO);
-					return blogVO;
-				})
-				.peek(blogVO -> {
-					UserVO userVO = getUserVO(blogVO.getUserId());
-					blogVO.setAuthor(userVO);
-				})
-				.peek(blogVO -> {
-					String images = blogVO.getImages();
-					if (images != null) {
-						String[] imgStr = images.split(",");
-						blogVO.setCoverImage(imgStr[0]);
-					}
-				})
-				.collect(Collectors.toList());
+		List<BlogVO> blogVOList = blogPage.getRecords().stream().map(blog -> {
+			BlogVO blogVO = new BlogVO();
+			BeanUtils.copyProperties(blog, blogVO);
+			return blogVO;
+		}).peek(blogVO -> {
+			UserVO userVO = getUserVO(blogVO.getUserId());
+			blogVO.setAuthor(userVO);
+		}).peek(blogVO -> {
+			String images = blogVO.getImages();
+			if (images != null) {
+				String[] imgStr = images.split(",");
+				blogVO.setCoverImage(imgStr[0]);
+			}
+		}).collect(Collectors.toList());
 
 		Page<BlogVO> blogVoPage = new Page<>();
 		BeanUtils.copyProperties(blogPage, blogVoPage);
@@ -129,8 +125,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 	}
 
 	private void handleUnlike(Blog blog, long blogId, Long userId, String key) {
-		blogLikeService.remove(new LambdaQueryWrapper<BlogLike>().eq(BlogLike::getUserId, userId)
-				.eq(BlogLike::getBlogId, blogId));
+		blogLikeService.remove(new LambdaQueryWrapper<BlogLike>().eq(BlogLike::getUserId, userId).eq(BlogLike::getBlogId, blogId));
 
 		int newNum = blog.getLikedNum() - 1;
 		this.update().eq("id", blogId).set("liked_num", newNum).update();
@@ -181,31 +176,33 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog>
 
 	// region 博客分页
 	@Override
-	public Page<BlogVO> pageBlog(long currentPage, Long userId) {
-		if (currentPage <= 0) {
+	public Page<BlogVO> pageBlog(BlogDTO blogDTO, Long userId) {
+		int pageSize = blogDTO.getPageSize();
+		int pageNum = blogDTO.getPageNum();
+		String searchText = blogDTO.getSearchText();
+
+
+		if (pageNum <= 0) {
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
 		}
 
 		LambdaQueryWrapper<Blog> blogLambdaQueryWrapper = new LambdaQueryWrapper<>();
 		blogLambdaQueryWrapper.orderByDesc(Blog::getCreateTime);
+		//		关键字查询
+		blogLambdaQueryWrapper.like(Blog::getContent, searchText).or(b -> b.like(Blog::getTitle, searchText));
+		Page<Blog> blogPage = this.page(new Page<>(pageNum, pageSize), blogLambdaQueryWrapper);
 
-		Page<Blog> blogPage = this.page(new Page<>(currentPage, PAGE_SIZE), blogLambdaQueryWrapper);
-
-		List<BlogVO> blogVOList = blogPage.getRecords().stream()
-				.map(blog -> {
-					BlogVO blogVO = new BlogVO();
-					BeanUtils.copyProperties(blog, blogVO);
-					return blogVO;
-				})
-				.peek(blogVO -> {
-					UserVO userVO = getBlogAuthor(blogVO.getUserId());
-					blogVO.setAuthor(userVO);
-				})
-				.peek(blogVO -> {
-					long count = getBlogLikeCount(blogVO.getId(), userId);
-					blogVO.setIsLike(count > 0);
-				})
-				.collect(Collectors.toList());
+		List<BlogVO> blogVOList = blogPage.getRecords().stream().map(blog -> {
+			BlogVO blogVO = new BlogVO();
+			BeanUtils.copyProperties(blog, blogVO);
+			return blogVO;
+		}).peek(blogVO -> {
+			UserVO userVO = getBlogAuthor(blogVO.getUserId());
+			blogVO.setAuthor(userVO);
+		}).peek(blogVO -> {
+			long count = getBlogLikeCount(blogVO.getId(), userId);
+			blogVO.setIsLike(count > 0);
+		}).collect(Collectors.toList());
 
 		blogVOList.forEach(this::processBlogImages);
 

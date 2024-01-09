@@ -5,9 +5,9 @@ spring:
     # 配置端口号465或者25
     port: 25
     # 发送者邮箱（根据自己邮箱填写）
-    username: xxx
+    username: 15182852522@163.com
     #  配置密码，注意是开启POP3/SMTP的授权密码(根据自己的授权密码填写)
-    password: xxxx
+    password: NJKSSWOMGMWJYNMD
 
     properties:
       mail:
@@ -62,10 +62,10 @@ server:
 aliyun:
   oss:
     file:
-      endpoint: xxx
-      keyid: xxx
-      keysecret: xxx
-      bucketname: xxx
+      endpoint: oss-cn-chengdu.aliyuncs.com
+      keyid: LTAI5tJGHkR15HAtpMxfrm9N
+      keysecret: euFVph4QYL92EkGebPwUrWGZeGHgri
+      bucketname: wuxie-image
 
 
 
