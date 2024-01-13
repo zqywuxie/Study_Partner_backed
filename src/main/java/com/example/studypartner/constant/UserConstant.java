@@ -27,4 +27,10 @@ public interface UserConstant {
 	String DEFAULT_NAME = "Default";
 
 
+	/*
+	签到key
+	 */
+	String USER_SIGN_KEY = "wuxie:user:sigin:";
+
+
 }

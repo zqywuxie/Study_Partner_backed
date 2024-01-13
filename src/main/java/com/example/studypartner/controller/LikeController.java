@@ -60,7 +60,7 @@ public class LikeController {
 	@GetMapping("/count")
 	@ApiOperation(value = "点赞数")
 
-	public CommonResult<Integer> getCaptcha(HttpServletRequest request) {
+	public CommonResult<Integer> getLikeCount(HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
 		if (loginUser == null) {
 			throw new ResultException(ErrorCode.NOT_LOGIN);

@@ -7,7 +7,7 @@ spring:
     # 发送者邮箱（根据自己邮箱填写）
     username: xxx
     #  配置密码，注意是开启POP3/SMTP的授权密码(根据自己的授权密码填写)
-    password: xx
+    password: xxx
 
     properties:
       mail:
@@ -62,8 +62,8 @@ server:
 aliyun:
   oss:
     file:
-      endpoint: xx
-      keyid: xx
+      endpoint: xxx
+      keyid: xxxx
       keysecret: xxx
       bucketname: xxx
 

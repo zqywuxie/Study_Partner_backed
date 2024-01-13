@@ -34,7 +34,7 @@ spring:
     timeout: 86400
     store-type: redis
   redis:
-    password: xxx
+    password: wszqy123.
     port: 6379
     host: localhost
     database: 1
@@ -61,7 +61,7 @@ server:
 aliyun:
   oss:
     file:
-      endpoint: xx
+      endpoint: xxx
       keyid: xxx
       keysecret: xxx
-      bucketname: wxxx
+      bucketname: xxx

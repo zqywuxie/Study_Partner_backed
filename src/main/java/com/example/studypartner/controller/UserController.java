@@ -10,6 +10,7 @@ import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.request.*;
 import com.example.studypartner.domain.vo.UserVO;
 import com.example.studypartner.exception.ResultException;
+import com.example.studypartner.service.SigninService;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.ResultUtils;
 import io.swagger.annotations.ApiImplicitParam;
@@ -44,8 +45,11 @@ import static com.example.studypartner.constant.UserConstant.USER_LOGIN_STATUS;
 //@CrossOrigin(origins = {"http://localhost:5173"}, allowCredentials = "true")
 @Slf4j
 public class UserController {
-	@Autowired
+	@Resource
 	UserService userService;
+
+	@Resource
+	SigninService signinService;
 
 	@Resource
 	private RedisTemplate redisTemplate;
@@ -151,6 +155,40 @@ public class UserController {
 		}
 		return ResultUtils.failed(ErrorCode.PARAMS_ERROR, register);
 	}
+
+	//endregion
+
+
+	//region 签到相关接口
+
+	/**
+	 * 签到接口
+	 *
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/sign")
+	public CommonResult<Boolean> sign(HttpServletRequest request) {
+		Long loginId = userService.getLoginUser(request).getId();
+		boolean flag = signinService.signIn(loginId);
+		return ResultUtils.success(flag);
+	}
+
+
+	/**
+	 * 连续签到天数
+	 *
+	 * @param request
+	 * @return
+	 */
+
+	@GetMapping("/sign/count")
+	public CommonResult<Integer> signDays(HttpServletRequest request) {
+		Long loginId = userService.getLoginUser(request).getId();
+		int signDays = signinService.signDays(loginId);
+		return ResultUtils.success(signDays);
+	}
+
 
 	//endregion
 

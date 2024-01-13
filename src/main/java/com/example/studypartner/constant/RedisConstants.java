@@ -86,4 +86,7 @@ public interface RedisConstants {
 	String FANS_COUNT_KEY = "wuxie:user:fans:count:";
 	String FOLLOW_COUNT_KEY = "wuxie:user:follow:count:";
 	Long AVATAR_UPDATE_TTL = 24L;
+
+
+
 }
