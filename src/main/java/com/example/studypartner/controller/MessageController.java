@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 消息控制器
@@ -86,7 +88,7 @@ public class MessageController {
 	 * @return {@link CommonResult}<{@link List}<{@link MessageVO}>>
 	 */
 	@GetMapping("/get/{type}")
-	@ApiOperation(value = "获取通知消息")
+	@ApiOperation(value = "根据信息类型获取通知消息")
 
 	public CommonResult<List<MessageVO>> getUserBlogMessage(@PathVariable("type") String type, HttpServletRequest request) {
 		User loginUser = userService.getLoginUser(request);
@@ -96,4 +98,20 @@ public class MessageController {
 		List<MessageVO> readMessage = messageService.getMessages(loginUser.getId(), Integer.valueOf(type));
 		return ResultUtils.success(readMessage);
 	}
+
+
+	//	按时间顺序给出5条
+	@GetMapping("/list")
+	@ApiOperation(value = "获得所有通知信息")
+
+	public CommonResult<List<MessageVO>> listMessage(HttpServletRequest request) {
+		User loginUser = userService.getLoginUser(request);
+		if (loginUser == null) {
+			throw new ResultException(ErrorCode.NOT_LOGIN);
+		}
+		List<MessageVO> messageVOList = messageService.getAllMessage(loginUser.getId());
+		List<MessageVO> sortedList = messageVOList.stream().sorted(Comparator.comparing(MessageVO::getCreateTime).reversed()).limit(5).collect(Collectors.toList());
+		return ResultUtils.success(sortedList);
+	}
+
 }

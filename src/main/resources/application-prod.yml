@@ -5,9 +5,9 @@ spring:
     # 配置端口号465或者25
     port: 465
     # 发送者邮箱（根据自己邮箱填写）
-    username: 15182852522@163.com
+    username: xxx
     #  配置密码，注意是开启POP3/SMTP的授权密码(根据自己的授权密码填写)
-    password: xx
+    password: xxx
 
     properties:
       mail:
@@ -34,7 +34,7 @@ spring:
     timeout: 86400
     store-type: redis
   redis:
-    password: wszqy123.
+    password: xxx
     port: 6379
     host: localhost
     database: 1
@@ -53,7 +53,7 @@ server:
     context-path: /api
     session:
       cookie:
-        domain: xxxx
+        domain: zqywuku.top
         secure: true
   port: 10091
 
@@ -61,7 +61,7 @@ server:
 aliyun:
   oss:
     file:
-      endpoint: oss-cn-chengdu.aliyuncs.com
-      keyid: xxxx
-      keysecret: xxxx
-      bucketname: xxxx
+      endpoint: xx
+      keyid: xxx
+      keysecret: xxx
+      bucketname: wxxx

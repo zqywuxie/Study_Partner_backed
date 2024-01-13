@@ -573,6 +573,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 	@Override
 	public List<TeamUserVO> myJoinTeams(TeamDTO teamDTO, Long loginUserId) {
 		// 从数据库中获取Team数据
+		if (teamDTO.getUserId() != null) {
+			loginUserId = teamDTO.getUserId();
+		}
 		LambdaQueryWrapper<Team> teamQuery = new LambdaQueryWrapper<Team>().eq(Team::getUserId, loginUserId);
 		List<Team> teams = this.list(teamQuery);
 
@@ -604,6 +607,9 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
 
 	@Override
 	public List<TeamUserVO> myCreateTeams(TeamDTO teamDTO, Long loginUserId) {
+		if (teamDTO.getUserId() != null) {
+			loginUserId = teamDTO.getUserId();
+		}
 		LambdaQueryWrapper<Team> select = new LambdaQueryWrapper<Team>().eq(Team::getUserId, loginUserId).select(Team::getId);
 		List<Long> idList = this.list(select).stream().map(Team::getId).collect(Collectors.toList());
 		teamDTO.setIdList(idList);

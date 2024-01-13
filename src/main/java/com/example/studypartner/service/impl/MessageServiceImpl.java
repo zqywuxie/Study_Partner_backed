@@ -65,6 +65,7 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 		return this.count(messageLambdaQueryWrapper);
 	}
 
+
 	@Override
 	public List<MessageVO> getMessages(Long userId, Integer type) {
 		LambdaQueryWrapper<Message> messageLambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -131,8 +132,19 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 				friendsRecordVO.setStatus(friendApplication.getStatus());
 				messageVO.setFriendsRecordVO(friendsRecordVO);
 			}
+			messageVO.setType(item.getType());
+			messageVO.setCreateTime(item.getCreateTime());
 			return messageVO;
 		}).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<MessageVO> getAllMessage(Long userId) {
+		List<MessageVO> messageVOList = new ArrayList<>();
+		for (int i = 0; i <= 5; i++) {
+			messageVOList.addAll(getMessages(userId, i));
+		}
+		return messageVOList;
 	}
 
 	@Override
