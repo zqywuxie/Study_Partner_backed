@@ -11,6 +11,7 @@ import org.springframework.data.redis.serializer.RedisSerializer;
  *
  *  自定义序列化
  *
+ * @author wuxie
  */
 @Configuration
 public class RedisTemplateConfig {

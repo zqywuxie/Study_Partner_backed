@@ -63,5 +63,5 @@ aliyun:
     file:
       endpoint: xxx
       keyid: xxx
-      keysecret: xxx
+      keysecret: xxxx
       bucketname: xxx

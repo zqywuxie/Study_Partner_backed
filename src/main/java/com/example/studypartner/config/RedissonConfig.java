@@ -10,25 +10,26 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Redission配置
+ * @author wuxie
  */
 @Configuration
 @ConfigurationProperties(prefix = "spring.redis")
 @Data
 public class RedissonConfig {
-    private String host;
-    private String port;
-    private String password;
-    @Bean
-    public RedissonClient redissonClient() {
-        // 1. Create config object 配置
-        Config config = new Config();
-        String redisAddress = String.format("redis://%s:%s", host, port);
-        config.useSingleServer()
-                .setAddress(redisAddress)
-                .setDatabase(1)
-                .setPassword(password);
-        // 2. Create Redisson instance 实例
-        RedissonClient redisson = Redisson.create(config);
-        return redisson;
-    }
+	private String host;
+	private String port;
+	private String password;
+
+	@Bean
+	public RedissonClient redissonClient() {
+		// 1. Create config object 配置
+		Config config = new Config();
+		String redisAddress = String.format("redis://%s:%s", host, port);
+		config.useSingleServer()
+				.setAddress(redisAddress)
+				.setDatabase(1)
+				.setPassword(password);
+		// 2. Create Redisson instance 实例
+		return Redisson.create(config);
+	}
 }

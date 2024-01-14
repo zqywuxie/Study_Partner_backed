@@ -16,11 +16,12 @@ import java.util.List;
  * @createDate 2022-10-10 16:54:41
  */
 public interface UserService extends IService<User> {
+
 	/**
-	 * @param useraccount   账号
-	 * @param password      账号密码
-	 * @param checkPassword 校验密码
-	 * @return 返回用户id
+	 * 注册
+	 *
+	 * @param request
+	 * @return
 	 */
 	String register(RegisterRequest request);
 
@@ -98,5 +99,5 @@ public interface UserService extends IService<User> {
 
 	Page<User> searchByText(UserDTO userDTO);
 
-	Page<User> recommend(Long pageSize, Long currentPage,Long userId);
+	Page<User> recommend(Long pageSize, Long currentPage, Long userId);
 }

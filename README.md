@@ -70,6 +70,14 @@ pc端主要功能：
   - [ ] 选择自己感兴趣的博客
 - [ ] 个人信息修改
 - [ ] 通知系统
+- [ ] 代办事项
+  - [X] 添加组件
+  - [ ] 后端接口
+- [ ] 地图功能
+  - [x] 前端组件
+  - [ ] 后端接口
+    - [ ] 新建一张表，用户登录后记录当前的经纬度
+    - [ ] 得到周围15km的用户信息
 
 PC端的美化
 
@@ -95,6 +103,10 @@ PC端的美化
     - Spring Session Data Redis: Spring框架对Redis的Session支持。
     - Redission: Redis分布式锁等功能的Java客户端。
     - Jakarta Mail (formerly JavaMail): 用于发送邮件的Java API。
+
+### 项目结构
+
+![架构图](https://gitee.com/kcsen/campus-partner-frontend/raw/master/doc/readmeimages/README-1694925656896.png)
 
 ## 快速上手
 

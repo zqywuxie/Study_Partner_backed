@@ -19,7 +19,6 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
@@ -66,7 +65,7 @@ public class UserController {
 	 */
 
 	@PostMapping("/login")
-	public CommonResult<User> Login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+	public CommonResult<User> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
 		if (loginRequest == null) {
 			throw new ResultException(ErrorCode.NULL_ERROR);
 		}

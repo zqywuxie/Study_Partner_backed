@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author wuxie
+ */
 @Data
 public class PageRequest implements Serializable {
 
