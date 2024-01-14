@@ -204,6 +204,17 @@
             <artifactId>spring-security-crypto</artifactId>
             <version>5.8.1</version>
         </dependency>
+
+        <!--        支付宝相关-->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+            <version>4.34.0.ALL</version>
+        </dependency>
+
+
+
+
     </dependencies>
     <!--七牛云上传图片服务-->
     <!-- https://mvnrepository.com/artifact/com.qiniu/qiniu-java-sdk -->
