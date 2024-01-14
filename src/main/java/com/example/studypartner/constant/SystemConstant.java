@@ -7,5 +7,7 @@ package com.example.studypartner.constant;
  */
 public interface SystemConstant {
 
-	Long PAGE_SIZE = 5L;
+	Long DEFAULT_PAGE_SIZE = 5L;
+
+
 }

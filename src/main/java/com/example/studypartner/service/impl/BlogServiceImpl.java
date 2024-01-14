@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.example.studypartner.common.ErrorCode;
-import com.example.studypartner.common.PageRequest;
 import com.example.studypartner.domain.dto.BlogDTO;
 import com.example.studypartner.domain.entity.*;
 import com.example.studypartner.domain.enums.MessageTypeEnum;
@@ -18,9 +17,7 @@ import com.example.studypartner.mapper.BlogMapper;
 import com.example.studypartner.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.studypartner.constant.RedisConstants.*;
-import static com.example.studypartner.constant.SystemConstant.PAGE_SIZE;
+import static com.example.studypartner.constant.SystemConstant.DEFAULT_PAGE_SIZE;
 
 
 /**
@@ -67,7 +64,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements Bl
 			throw new ResultException(ErrorCode.PARAMS_ERROR);
 		}
 
-		Page<Blog> blogPage = this.page(new Page<>(currentPage, PAGE_SIZE), new LambdaQueryWrapper<Blog>().eq(Blog::getUserId, userId));
+		Page<Blog> blogPage = this.page(new Page<>(currentPage, DEFAULT_PAGE_SIZE), new LambdaQueryWrapper<Blog>().eq(Blog::getUserId, userId));
 
 		List<BlogVO> blogVOList = blogPage.getRecords().stream().map(blog -> {
 			BlogVO blogVO = new BlogVO();

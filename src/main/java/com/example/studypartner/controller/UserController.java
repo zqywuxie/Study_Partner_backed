@@ -8,9 +8,11 @@ import com.example.studypartner.constant.RedisConstants;
 import com.example.studypartner.domain.dto.UserDTO;
 import com.example.studypartner.domain.entity.User;
 import com.example.studypartner.domain.request.*;
+import com.example.studypartner.domain.vo.UserLocationVO;
 import com.example.studypartner.domain.vo.UserVO;
 import com.example.studypartner.exception.ResultException;
 import com.example.studypartner.service.SigninService;
+import com.example.studypartner.service.UserLocationService;
 import com.example.studypartner.service.UserService;
 import com.example.studypartner.utils.ResultUtils;
 import io.swagger.annotations.ApiImplicitParam;
@@ -49,6 +51,9 @@ public class UserController {
 
 	@Resource
 	SigninService signinService;
+
+	@Resource
+	UserLocationService userLocationService;
 
 	@Resource
 	private RedisTemplate redisTemplate;
@@ -381,4 +386,16 @@ public class UserController {
 		}
 		return ResultUtils.success(userService.matchUsers(num, loginUser));
 	}
+
+
+	//	region 地图匹配相关
+
+
+	@GetMapping("/location")
+	public CommonResult<List<UserLocationVO>> nearbyPartners(HttpServletRequest request, LocationRequest locationRequest) {
+		Long loginUserId = userService.getLoginUser(request).getId();
+		List<UserLocationVO> userLocationVOS = userLocationService.nearbyPartners(loginUserId, 1, locationRequest.getX(), locationRequest.getY());
+		return ResultUtils.success(userLocationVOS);
+	}
+	//endregion
 }
