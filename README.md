@@ -12,10 +12,12 @@
 > 为大学生组队、交友等社交场景提供便利匹配的系统
 >
 > 该系统为H5移动端/PC端+后台管理系统，SpringBoot + Vue 全栈项目
-> 
-> 前端代码:[zqywuxie/Study_Partner_fronted: 志同道合(伙伴匹配系统前端代码) (github.com)](https://github.com/zqywuxie/Study_Partner_fronted)
 >
-> 后端代码:[zqywuxie/Study_Partner_backed: 志同道合(伙伴匹配系统后端代码) (github.com)](https://github.com/zqywuxie/Study_Partner_backed)
+>
+前端代码:[zqywuxie/Study_Partner_fronted: 志同道合(伙伴匹配系统前端代码) (github.com)](https://github.com/zqywuxie/Study_Partner_fronted)
+>
+>
+后端代码:[zqywuxie/Study_Partner_backed: 志同道合(伙伴匹配系统后端代码) (github.com)](https://github.com/zqywuxie/Study_Partner_backed)
 
 ## 项目介绍
 
@@ -53,31 +55,38 @@ PC端：
 pc端主要功能：
 
 - [ ] 找伙伴
-  - [x] 随机匹配
-    - [ ] 展示卡片 联系我
-  - [x] 智能匹配
+    - [x] 随机匹配
+        - [ ] 展示卡片 联系我
+    - [x] 智能匹配
 
 - [ ] 找队伍
-  - [ ] 队伍卡片的优化和美化
+    - [ ] 队伍卡片的优化和美化
 - [ ] 聊天室
-  - [x] 私聊
-  - [x] 群聊
-  - [ ] 大厅聊天
-  - [ ] 设置陌生人聊天不超过三条
+    - [x] 私聊
+    - [x] 群聊
+    - [ ] 大厅聊天
+    - [ ] 设置陌生人聊天不超过三条
 - [ ] 博客广场
-  - [x] 优化和美化博客展示
-  - [ ] 博客评论接口数据对接
-  - [ ] 选择自己感兴趣的博客
+    - [x] 优化和美化博客展示
+    - [ ] 博客评论接口数据对接
+    - [ ] 选择自己感兴趣的博客
 - [ ] 个人信息修改
 - [ ] 通知系统
 - [ ] 代办事项
-  - [X] 添加组件
-  - [ ] 后端接口
+    - [X] 添加组件
+    - [ ] 后端接口
 - [ ] 地图功能
-  - [x] 前端组件
-  - [ ] 后端接口
-    - [ ] 新建一张表，用户登录后记录当前的经纬度
-    - [ ] 得到周围15km的用户信息
+    - [x] 前端组件
+    - [ ] 后端接口
+        - [ ] 新建一张表，用户登录后记录当前的经纬度
+        - [ ] 得到周围15km的用户信息
+- [ ] 签到
+  - [x] 签到接口（前端待对接）
+  - [ ] 签到积分模块(新建一张积分表)
+  - [ ] 积分兑换机制
+- [ ] 商店
+  - [x] 接入支付宝
+  - [ ] 商店布局(新建一张商品表)
 
 PC端的美化
 
@@ -103,6 +112,8 @@ PC端的美化
     - Spring Session Data Redis: Spring框架对Redis的Session支持。
     - Redission: Redis分布式锁等功能的Java客户端。
     - Jakarta Mail (formerly JavaMail): 用于发送邮件的Java API。
+    - 高德地图，腾讯地图API：接入腾讯地图定位API,查找周围伙伴；高德地图用来展示伙伴位置
+    - 接入支付宝功能: netapp实现内网穿透，进行支付宝支付功能
 
 ### 项目结构
 
@@ -146,14 +157,12 @@ cd Study_Partner_fronted-master
 
 2. 使用IDEA插件，`maven-helper`快速安装相关依赖
 3. 找到StudyPartnerApplication 启动项目
-4. 可在application.yml修改启动端口
+4. 可在application.yml修改启动端口，并且更换你自己数据库，redis等信息
 
 ```yaml
 server:
   port: 8081
 ```
-
-
 
 ## 功能模块
 
@@ -199,7 +208,6 @@ server:
 
 - 个人信息的修改
 - 查看创建，加入的队伍；我的博文；好友列表；关注列表
-
 
 管理员
 
@@ -296,8 +304,6 @@ server:
     default-encoding: UTF-8
 ```
 
-
-
 ## 软硬件资源
 
 - JDK
@@ -317,6 +323,7 @@ server:
 
 注意前端websocket请求要改变
 配置后面nginx的配置,因为使用ws是http协议,https无法使用http
+
 ```html
     let socketUrl = `wss://www.zqywuku.top/api/websocket/${uid}/${stats.value.team.teamId}`
 ```
@@ -352,7 +359,6 @@ server:
      }
 
 ```
-
 
 ## 项目展示
 
