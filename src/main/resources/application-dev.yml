@@ -3,11 +3,11 @@ spring:
     # 配置SMTP服务器地址
     host: smtp.163.com
     # 配置端口号465或者25
-    port: 25
+    port: 465
     # 发送者邮箱（根据自己邮箱填写）
-    username: 15182852522@163.com
+    username: xxx
     #  配置密码，注意是开启POP3/SMTP的授权密码(根据自己的授权密码填写)
-    password: VDPLCLQERTFWHTZM
+    password: xxx
 
     properties:
       mail:
@@ -27,24 +27,20 @@ spring:
   datasource:
     username: root
     password: wszqy123.
-    url: jdbc:mysql://localhost:3306/usercenter?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/study?useSSL=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     driver-class-name: com.mysql.cj.jdbc.Driver
     # 配置session的存储方式
   session:
     timeout: 86400
     store-type: redis
   redis:
-    password: 123456
-    port: 6667
+    password: wszqy123.
+    port: 6379
     host: localhost
     database: 1
   #  mvc:
   #    pathmatch:
   #      matching-strategy: ant_path_matcher
-
-#  静态资源位置
-  resources:
-    static-locations: classpath:/static/
 
 mybatis-plus:
   configuration:
@@ -57,15 +53,15 @@ server:
     context-path: /api
     session:
       cookie:
-        domain: localhost
+        domain: zqywuku.top
         secure: true
-  port: 8081
+  port: 10091
 
 # 阿里云OSS配置，图片上传使用
 aliyun:
   oss:
     file:
-      endpoint: oss-cn-chengdu.aliyuncs.com
-      keyid: LTAI5tH3kMqBcheoJ6LUi5DL
-      keysecret: 1vbTytQTcfP0ydInB3ztZcyOQ2nxrW
-      bucketname: wuxie-image
+      endpoint: xxx
+      keyid: xxx
+      keysecret: xxxx
+      bucketname: xxx
