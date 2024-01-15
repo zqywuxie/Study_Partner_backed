@@ -30,5 +30,11 @@ public interface UserLocationService extends IService<UserLocation> {
 	List<UserLocationVO> nearbyPartners(Long userId, Integer current, Double x, Double y);
 
 
+	/**
+	 * 附近好友
+	 *
+	 * @return
+	 */
 	Boolean loadData();
+
 }
