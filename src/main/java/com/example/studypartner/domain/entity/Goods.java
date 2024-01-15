@@ -40,6 +40,11 @@ public class Goods implements Serializable {
      */
     private Integer score;
 
+	/**
+	 * 商品描述
+	 */
+	private String description;
+
     /**
      * 逻辑删除
      */

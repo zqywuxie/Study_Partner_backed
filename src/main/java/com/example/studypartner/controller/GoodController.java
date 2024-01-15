@@ -1,14 +1,14 @@
 package com.example.studypartner.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.studypartner.common.CommonResult;
+import com.example.studypartner.domain.dto.GoodsDTO;
 import com.example.studypartner.domain.entity.Goods;
 import com.example.studypartner.service.GoodsService;
 import com.example.studypartner.utils.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -35,9 +35,9 @@ public class GoodController {
 	 * @param: []
 	 * @return: com.example.studypartner.common.CommonResult<java.util.List < com.example.studypartner.domain.entity.Goods>>
 	 */
-	@RequestMapping("/list")
-	public CommonResult<List<Goods>> list() {
-		List<Goods> goodsList = goodsService.list();
+	@GetMapping("/list")
+	public CommonResult<Page<Goods>> list(@RequestParam GoodsDTO goodsDTO) {
+		Page<Goods> goodsList = goodsService.getAll(goodsDTO);
 		return ResultUtils.success(goodsList);
 	}
 

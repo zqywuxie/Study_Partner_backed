@@ -268,17 +268,17 @@ public class UserController {
 		return ResultUtils.success("ok");
 	}
 
-	/**
-	 * 根据用户名，简介，标签查询
-	 * 管理接口
-	 *
-	 * @param searchText
-	 * @param request
-	 * @return
-	 */
 
+
+
+	/**
+	 * 根据用户id查询用户
+	 *
+	 * @param userDTO 用户id
+	 * @return 用户
+	 */
 	@GetMapping("/searchByText")
-	public CommonResult<Page<User>> searchByText(@RequestBody UserDTO userDTO, HttpServletRequest request) {
+	public CommonResult<Page<User>> searchByText(@RequestParam UserDTO userDTO) {
 		return ResultUtils.success(userService.searchByText(userDTO));
 	}
 

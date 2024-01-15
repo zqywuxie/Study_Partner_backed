@@ -1,7 +1,10 @@
 package com.example.studypartner.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import com.example.studypartner.domain.dto.GoodsDTO;
 import com.example.studypartner.domain.entity.Goods;
 import com.example.studypartner.mapper.GoodsMapper;
 import com.example.studypartner.service.GoodsService;
@@ -30,9 +33,19 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods>
 	 * @return 所有商品
 	 */
 	@Override
-	public List<Goods> getAll() {
-		//获得所有商品
-		return this.list();
+	public Page<Goods> getAll(GoodsDTO goodsDTO) {
+		//分页查询商品，goodsDTO为查询条件
+		int pageSize = goodsDTO.getPageSize();
+		int pageNum = goodsDTO.getPageNum();
+
+		String searchText = goodsDTO.getSearchText();
+		//searchText不为空时，根据商品名称或者商品描述模糊查询
+		LambdaQueryWrapper<Goods> wrapper = new LambdaQueryWrapper<>();
+		if (searchText != null && !searchText.isEmpty()) {
+			wrapper.like(Goods::getName, searchText)
+					.or().like(Goods::getDescription, searchText);
+		}
+		return this.page(new Page<>(pageNum, pageSize), wrapper);
 	}
 
 	/**

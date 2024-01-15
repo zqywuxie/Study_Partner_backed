@@ -37,6 +37,7 @@ public class UserLocationController {
 	//写一个获得坐标接口
 	@GetMapping("/get")
 	public CommonResult<UserLocationVO> getLocation(HttpServletRequest request) {
+		return null;
 	}
 
 

@@ -28,6 +28,7 @@ import java.util.Set;
  * 支付宝的支付接口
  * 用户名：flrnht7304@sandbox.com
  * 密码：111111
+ * @author wuxie
  */
 
 // http://localhost:8081/api/ali/pay?orderId=202307302343&price=12.56&subject=iPhone

@@ -2,11 +2,8 @@ package com.example.studypartner.job;
 
 import cn.hutool.core.date.StopWatch;
 import com.example.studypartner.domain.entity.Orders;
-import com.example.studypartner.domain.entity.Team;
 import com.example.studypartner.domain.enums.OrderStatus;
 import com.example.studypartner.service.OrdersService;
-import com.example.studypartner.service.TeamService;
-import com.sun.org.apache.xpath.internal.operations.Or;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -15,7 +12,6 @@ import org.redisson.api.RedissonClient;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import javax.annotation.Resource;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 

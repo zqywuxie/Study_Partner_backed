@@ -1,6 +1,8 @@
 package com.example.studypartner.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.example.studypartner.domain.dto.GoodsDTO;
 import com.example.studypartner.domain.entity.Goods;
 
 import java.util.List;
@@ -12,12 +14,12 @@ import java.util.List;
 */
 public interface GoodsService extends IService<Goods> {
 
-
 	/**
-	 * 获取所有商品
-	 * @return 商品列表
+	 * 获得所有商品
+	 * @return 所有商品
 	 */
-	List<Goods> getAll();
+
+	Page<Goods> getAll(GoodsDTO goodsDTO);
 
 	/**
 	 * 根据商品id获取商品
