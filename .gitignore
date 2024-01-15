@@ -31,6 +31,6 @@ build/
 .vscode/
 
 
-application-dev.yml
-application-prod.yml
-alipay.properties
+application-dev
+application-prod
+alipay
