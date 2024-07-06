@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.studypartner.mapper.UserLocationMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.studypartner.domain.entity.UserLocation">
+            <id property="id" column="id" jdbcType="BIGINT"/>
+            <result property="userId" column="user_id" jdbcType="BIGINT"/>
+            <result property="latitude" column="latitude" jdbcType="DOUBLE"/>
+            <result property="longitude" column="longitude" jdbcType="DOUBLE"/>
+            <result property="deleted" column="deleted" jdbcType="TINYINT"/>
+            <result property="nation" column="nation" jdbcType="VARCHAR"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="provice" column="provice" jdbcType="VARCHAR"/>
+            <result property="city" column="city" jdbcType="VARCHAR"/>
+            <result property="district" column="district" jdbcType="VARCHAR"/>
+            <result property="ip" column="ip" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,user_id,latitude,
+        longitude,deleted,nation,
+        update_time,provice,city,
+        district,ip
+    </sql>
+</mapper>
