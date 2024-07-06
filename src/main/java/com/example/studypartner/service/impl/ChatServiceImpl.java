@@ -44,7 +44,6 @@ import static com.example.studypartner.constant.UserConstant.ADMIN_ROLE;
 public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 		implements ChatService {
 
-
 	@Resource
 	private RedisTemplate<String, Object> redisTemplate;
 
@@ -67,18 +66,17 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 			return chatRecords;
 		}
 
-
 		LambdaQueryWrapper<Chat> chatLambdaQueryWrapper = new LambdaQueryWrapper<>();
-		chatLambdaQueryWrapper.
-				and(privateChat -> privateChat.eq(Chat::getFromId, loginUser.getId()).eq(Chat::getToId, toId)
-						.or().
-						eq(Chat::getToId, loginUser.getId()).eq(Chat::getFromId, toId)
-				).eq(Chat::getChatType, chatType);
+		chatLambdaQueryWrapper
+				.and(privateChat -> privateChat.eq(Chat::getFromId, loginUser.getId()).eq(Chat::getToId, toId)
+						.or().eq(Chat::getToId, loginUser.getId()).eq(Chat::getFromId, toId))
+				.eq(Chat::getChatType, chatType);
 		// 两方共有聊天
 		List<Chat> list = this.list(chatLambdaQueryWrapper);
 
 		List<ChatMessageVO> chatMessageVOS = list.stream().map(chat -> {
-			ChatMessageVO chatMessageVO = chatResult(loginUser.getId(), toId, chat.getContent(), chatType, chat.getCreateTime());
+			ChatMessageVO chatMessageVO = chatResult(loginUser.getId(), toId, chat.getContent(), chatType,
+					chat.getCreateTime());
 			if (chat.getFromId().equals(loginUser.getId())) {
 				chatMessageVO.setIsMy(true);
 			}
@@ -159,7 +157,7 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 			throw new ResultException(ErrorCode.PARAMS_ERROR, "请求有误");
 		}
 		List<ChatMessageVO> chatRecords = getCache(CACHE_CHAT_TEAM, String.valueOf(teamId));
-		if (!chatRecords.isEmpty()) {
+		if (chatRecords != null && !chatRecords.isEmpty()) {
 			List<ChatMessageVO> chatMessageVOS = checkIsMyMessage(loginUser, chatRecords);
 			saveCache(CACHE_CHAT_TEAM, String.valueOf(teamId), chatMessageVOS);
 			return chatMessageVOS;
@@ -187,13 +185,13 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 		return chatMessageVOS;
 	}
 
-	//todo 清空聊天记录
+	// todo 清空聊天记录
 	@Override
 	public Boolean clearChatRecords(ChatClearRequest chatClearRequest) {
 		return null;
 	}
 
-	//todo
+	// todo
 	@Override
 	public List<UserVO> getPrivateUser(User loginUser) {
 		return userService.list(new LambdaQueryWrapper<User>()
@@ -202,13 +200,13 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 								.select(Chat::getToId)
 								.eq(Chat::getFromId, loginUser.getId())
 								.groupBy(Chat::getToId)
-								.isNotNull(Chat::getToId)
-				).stream().map(Chat::getToId).collect(Collectors.toList()))
-		).stream().map(user -> {
-			UserVO userVO = new UserVO();
-			BeanUtils.copyProperties(user, userVO);
-			return userVO;
-		}).collect(Collectors.toList());
+								.isNotNull(Chat::getToId))
+						.stream().map(Chat::getToId).collect(Collectors.toList())))
+				.stream().map(user -> {
+					UserVO userVO = new UserVO();
+					BeanUtils.copyProperties(user, userVO);
+					return userVO;
+				}).collect(Collectors.toList());
 	}
 
 	private List<ChatMessageVO> checkIsMyMessage(User loginUser, List<ChatMessageVO> chatRecords) {
@@ -222,8 +220,8 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 		}).collect(Collectors.toList());
 	}
 
-	private List<ChatMessageVO> returnMessage(User loginUser, Long
-			userId, LambdaQueryWrapper<Chat> chatLambdaQueryWrapper) {
+	private List<ChatMessageVO> returnMessage(User loginUser, Long userId,
+			LambdaQueryWrapper<Chat> chatLambdaQueryWrapper) {
 		List<Chat> chatList = this.list(chatLambdaQueryWrapper);
 		return chatList.stream().map(chat -> {
 			ChatMessageVO chatMessageVO = chatResult(chat.getFromId(), chat.getContent());
@@ -239,7 +237,3 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
 		}).collect(Collectors.toList());
 	}
 }
-
-
-
-
